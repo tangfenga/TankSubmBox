@@ -47,7 +47,7 @@ type TankApplication struct {
 	filename  string
 }
 
-//Start the application.
+// Start the application.
 func (this *TankApplication) Start() {
 
 	defer func() {
@@ -248,7 +248,7 @@ func (this *TankApplication) HandleCrawl() {
 
 }
 
-//fetch the application version
+// fetch the application version
 func (this *TankApplication) HandleVersion() {
 
 	fmt.Printf("EyeblueTank %s\r\n", core.VERSION)

@@ -1,14 +1,15 @@
 package rest
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/cache"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/util"
 	"github.com/eyebluecn/tank/code/tool/uuid"
-	"net/http"
-	"os"
-	"time"
 )
 
 // @Service
@@ -205,7 +206,7 @@ func (this *UserService) FindCacheUsersByUuid(userUuid string) []*User {
 
 	var users []*User
 	//let session user work.
-	core.CONTEXT.GetSessionCache().Foreach(func(key interface{}, cacheItem *cache.Item) {
+	core.CONTEXT.GetSessionCache().Foreach(func(key any, cacheItem *cache.Item) {
 		if cacheItem == nil || cacheItem.Data() == nil {
 			return
 		}
@@ -225,9 +226,9 @@ func (this *UserService) FindCacheUsersByUuid(userUuid string) []*User {
 // remove cache user by its userUuid
 func (this *UserService) RemoveCacheUserByUuid(userUuid string) {
 
-	var sessionId interface{}
+	var sessionId any
 	//let session user work.
-	core.CONTEXT.GetSessionCache().Foreach(func(key interface{}, cacheItem *cache.Item) {
+	core.CONTEXT.GetSessionCache().Foreach(func(key any, cacheItem *cache.Item) {
 		if cacheItem == nil || cacheItem.Data() == nil {
 			return
 		}

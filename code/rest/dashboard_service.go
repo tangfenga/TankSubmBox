@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//@Service
+// @Service
 type DashboardService struct {
 	BaseBean
 	dashboardDao  *DashboardDao

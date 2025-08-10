@@ -4,7 +4,7 @@ import (
 	"github.com/eyebluecn/tank/code/core"
 )
 
-//@Service
+// @Service
 type BridgeService struct {
 	BaseBean
 	bridgeDao *BridgeDao

@@ -1,11 +1,12 @@
 package rest
 
 import (
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type DashboardDao struct {
@@ -55,11 +56,10 @@ func (this *DashboardDao) Page(page int, pageSize int, dt string, sortArray []bu
 	var wp = &builder.WherePair{}
 
 	if dt != "" {
-		wp = wp.And(&builder.WherePair{Query: "dt = ?", Args: []interface{}{dt}})
+		wp = wp.And(&builder.WherePair{Query: "dt = ?", Args: []any{dt}})
 	}
 
-	var conditionDB *gorm.DB
-	conditionDB = core.CONTEXT.GetDB().Model(&Dashboard{}).Where(wp.Query, wp.Args...)
+	var conditionDB *gorm.DB = core.CONTEXT.GetDB().Model(&Dashboard{}).Where(wp.Query, wp.Args...)
 
 	var count int64 = 0
 	db := conditionDB.Count(&count)

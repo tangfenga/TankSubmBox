@@ -1,0 +1,28 @@
+@import "../../assets/css/global/variables";
+
+.layout-bottom {
+
+  transition: all 0.4s;
+  text-align: center;
+
+  position: fixed;
+  height: @power-footer-height;
+  line-height: @power-footer-height;
+  background-color: white;
+  bottom: 0;
+  right: 0;
+  left: @sidebar-width;
+  padding: 0 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .item {
+    margin-right: 10px;
+  }
+
+  .brand {
+    white-space: pre;
+  }
+}

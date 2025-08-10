@@ -2,7 +2,7 @@ package rest
 
 import "github.com/eyebluecn/tank/code/core"
 
-//@Service
+// @Service
 type SessionService struct {
 	BaseBean
 	userDao    *UserDao
@@ -24,7 +24,7 @@ func (this *SessionService) Init() {
 
 }
 
-//System cleanup.
+// System cleanup.
 func (this *SessionService) Cleanup() {
 
 	this.logger.Info("[SessionService] clean up. Delete all Session. total:%d", core.CONTEXT.GetSessionCache().Count())

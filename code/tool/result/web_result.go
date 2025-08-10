@@ -2,15 +2,16 @@ package result
 
 import (
 	"fmt"
-	"github.com/eyebluecn/tank/code/tool/i18n"
 	"net/http"
 	"strconv"
+
+	"github.com/eyebluecn/tank/code/tool/i18n"
 )
 
 type WebResult struct {
-	Code string      `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+	Code string `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
 }
 
 func (this *WebResult) Error() string {
@@ -93,7 +94,7 @@ func ConstWebResult(codeWrapper *CodeWrapper) *WebResult {
 	return wr
 }
 
-func CustomWebResultI18n(request *http.Request, codeWrapper *CodeWrapper, item *i18n.Item, v ...interface{}) *WebResult {
+func CustomWebResultI18n(request *http.Request, codeWrapper *CodeWrapper, item *i18n.Item, v ...any) *WebResult {
 
 	return CustomWebResult(codeWrapper, fmt.Sprintf(item.Message(request), v...))
 
@@ -111,7 +112,7 @@ func CustomWebResult(codeWrapper *CodeWrapper, description string) *WebResult {
 	return wr
 }
 
-//use standard http status code.
+// use standard http status code.
 func StatusCodeWebResult(statusCode int, description string) *WebResult {
 	if description == "" {
 		description = http.StatusText(statusCode)
@@ -123,29 +124,29 @@ func StatusCodeWebResult(statusCode int, description string) *WebResult {
 	return wr
 }
 
-func BadRequestI18n(request *http.Request, item *i18n.Item, v ...interface{}) *WebResult {
+func BadRequestI18n(request *http.Request, item *i18n.Item, v ...any) *WebResult {
 	return CustomWebResult(BAD_REQUEST, fmt.Sprintf(item.Message(request), v...))
 }
 
-func BadRequest(format string, v ...interface{}) *WebResult {
+func BadRequest(format string, v ...any) *WebResult {
 	return CustomWebResult(BAD_REQUEST, fmt.Sprintf(format, v...))
 }
 
-func Unauthorized(format string, v ...interface{}) *WebResult {
+func Unauthorized(format string, v ...any) *WebResult {
 	return CustomWebResult(UNAUTHORIZED, fmt.Sprintf(format, v...))
 }
 
-func NotFound(format string, v ...interface{}) *WebResult {
+func NotFound(format string, v ...any) *WebResult {
 	return CustomWebResult(NOT_FOUND, fmt.Sprintf(format, v...))
 
 }
 
-//sever inner error
-func Server(format string, v ...interface{}) *WebResult {
+// sever inner error
+func Server(format string, v ...any) *WebResult {
 	return CustomWebResult(SERVER, fmt.Sprintf(format, v...))
 }
 
-//db error.
+// db error.
 var (
 	DB_ERROR_DUPLICATE_KEY  = "Error 1062: Duplicate entry"
 	DB_ERROR_NOT_FOUND      = "record not found"

@@ -6,15 +6,16 @@ import (
 	"github.com/eyebluecn/tank/code/tool/result"
 	"gorm.io/gorm"
 
-	"github.com/eyebluecn/tank/code/tool/uuid"
 	"time"
+
+	"github.com/eyebluecn/tank/code/tool/uuid"
 )
 
 type FootprintDao struct {
 	BaseDao
 }
 
-//find by uuid. if not found return nil.
+// find by uuid. if not found return nil.
 func (this *FootprintDao) FindByUuid(uuid string) *Footprint {
 	var entity = &Footprint{}
 	db := core.CONTEXT.GetDB().Where("uuid = ?", uuid).First(entity)
@@ -28,7 +29,7 @@ func (this *FootprintDao) FindByUuid(uuid string) *Footprint {
 	return entity
 }
 
-//find by uuid. if not found panic NotFound error
+// find by uuid. if not found panic NotFound error
 func (this *FootprintDao) CheckByUuid(uuid string) *Footprint {
 	entity := this.FindByUuid(uuid)
 	if entity == nil {
@@ -42,7 +43,7 @@ func (this *FootprintDao) Page(page int, pageSize int, userUuid string, sortArra
 	var wp = &builder.WherePair{}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	var conditionDB *gorm.DB
@@ -97,7 +98,7 @@ func (this *FootprintDao) CountBetweenTime(startTime time.Time, endTime time.Tim
 
 func (this *FootprintDao) UvBetweenTime(startTime time.Time, endTime time.Time) int64 {
 
-	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []interface{}{startTime, endTime}}
+	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []any{startTime, endTime}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Footprint{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -115,7 +116,7 @@ func (this *FootprintDao) UvBetweenTime(startTime time.Time, endTime time.Time) 
 
 func (this *FootprintDao) AvgCostBetweenTime(startTime time.Time, endTime time.Time) int64 {
 
-	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []interface{}{startTime, endTime}}
+	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []any{startTime, endTime}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Footprint{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -144,7 +145,7 @@ func (this *FootprintDao) DeleteByUserUuid(userUuid string) {
 
 }
 
-//System cleanup.
+// System cleanup.
 func (this *FootprintDao) Cleanup() {
 	this.logger.Info("[FootprintDao][DownloadTokenDao] clean up. Delete all Footprint")
 	db := core.CONTEXT.GetDB().Where("uuid is not null").Delete(Footprint{})

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//zip srcPath to destPath。
+// zip srcPath to destPath。
 func Zip(srcPath string, destPath string) error {
 
 	srcPath = UniformPath(srcPath)

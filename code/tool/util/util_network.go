@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-//get ip from request
+// get ip from request
 func GetIpAddress(r *http.Request) string {
 	var ipAddress string
 
@@ -25,14 +25,14 @@ func GetIpAddress(r *http.Request) string {
 	return ipAddress
 }
 
-//get host from request
+// get host from request
 func GetHostFromRequest(request *http.Request) string {
 
 	return request.Host
 
 }
 
-//get cookieAuthKey from request.
+// get cookieAuthKey from request.
 func GetSessionUuidFromRequest(request *http.Request, cookieAuthKey string) string {
 
 	//get from cookie
@@ -49,7 +49,7 @@ func GetSessionUuidFromRequest(request *http.Request, cookieAuthKey string) stri
 
 }
 
-//allow cors.
+// allow cors.
 func AllowCORS(writer http.ResponseWriter) {
 	writer.Header().Add("Access-Control-Allow-Origin", "*")
 	writer.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
@@ -57,7 +57,7 @@ func AllowCORS(writer http.ResponseWriter) {
 	writer.Header().Add("Access-Control-Allow-Headers", "content-type")
 }
 
-//disable cache.
+// disable cache.
 func DisableCache(writer http.ResponseWriter) {
 	//IE browser will cache automatically. disable the cache.
 	writer.Header().Set("Pragma", "No-cache")

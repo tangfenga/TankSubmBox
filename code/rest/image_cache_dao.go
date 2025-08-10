@@ -2,15 +2,16 @@ package rest
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/util"
 	"github.com/eyebluecn/tank/code/tool/uuid"
 	"gorm.io/gorm"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 type ImageCacheDao struct {
@@ -46,11 +47,11 @@ func (this *ImageCacheDao) FindByMatterUuidAndMode(matterUuid string, mode strin
 	var wp = &builder.WherePair{}
 
 	if matterUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []interface{}{matterUuid}})
+		wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []any{matterUuid}})
 	}
 
 	if mode != "" {
-		wp = wp.And(&builder.WherePair{Query: "mode = ?", Args: []interface{}{mode}})
+		wp = wp.And(&builder.WherePair{Query: "mode = ?", Args: []any{mode}})
 	}
 
 	var imageCache = &ImageCache{}
@@ -91,11 +92,11 @@ func (this *ImageCacheDao) Page(page int, pageSize int, userUuid string, matterU
 	var wp = &builder.WherePair{}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	if matterUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []interface{}{matterUuid}})
+		wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []any{matterUuid}})
 	}
 
 	var conditionDB *gorm.DB
@@ -167,7 +168,7 @@ func (this *ImageCacheDao) DeleteByMatterUuid(matterUuid string) {
 
 	var wp = &builder.WherePair{}
 
-	wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []interface{}{matterUuid}})
+	wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []any{matterUuid}})
 
 	var imageCaches []*ImageCache
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args).Find(&imageCaches)
@@ -191,7 +192,7 @@ func (this *ImageCacheDao) DeleteByUserUuid(userUuid string) {
 
 func (this *ImageCacheDao) SizeBetweenTime(startTime time.Time, endTime time.Time) int64 {
 
-	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []interface{}{startTime, endTime}}
+	var wp = &builder.WherePair{Query: "create_time >= ? AND create_time <= ?", Args: []any{startTime, endTime}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&ImageCache{}).Where(wp.Query, wp.Args...).Count(&count)

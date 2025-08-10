@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//@Service
+// @Service
 type FootprintService struct {
 	BaseBean
 	footprintDao *FootprintDao
@@ -38,7 +38,7 @@ func (this *FootprintService) Detail(uuid string) *Footprint {
 	return footprint
 }
 
-//log a request.
+// log a request.
 func (this *FootprintService) Trace(request *http.Request, duration time.Duration, success bool) {
 
 	params := make(map[string][]string)

@@ -618,7 +618,7 @@ var allMimeMap = map[string]string{
 	".z":                      "application/x-compress",
 	".zip":                    "application/zip"}
 
-//get extension by name. lowercase.
+// get extension by name. lowercase.
 func GetExtension(filename string) string {
 
 	var extension = filepath.Ext(filename)
@@ -627,7 +627,7 @@ func GetExtension(filename string) string {
 
 }
 
-//get filename without extension
+// get filename without extension
 func GetSimpleFileName(filename string) string {
 
 	for i := len(filename) - 1; i >= 0 && !os.IsPathSeparator(filename[i]); i-- {
@@ -639,7 +639,7 @@ func GetSimpleFileName(filename string) string {
 
 }
 
-//get MimeType by filename, if not found return "application/octet-stream"
+// get MimeType by filename, if not found return "application/octet-stream"
 func GetMimeType(filename string) string {
 
 	extension := GetExtension(filename)
@@ -651,7 +651,7 @@ func GetMimeType(filename string) string {
 	}
 }
 
-//get MimeType by filename, if not found return fallback.
+// get MimeType by filename, if not found return fallback.
 func GetFallbackMimeType(filename string, fallback string) string {
 
 	extension := GetExtension(filename)

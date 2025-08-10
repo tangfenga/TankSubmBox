@@ -1,74 +1,91 @@
-[![蓝眼云盘logo](./build/doc/img/logo.png)](https://github.com/eyebluecn/tank)
+# TankSubmBox
 
-[English Version](https://tank-doc.eyeblue.cn/en)
+**本项目基于[蓝眼云盘](https://tank-doc.eyeblue.cn/) 4.1.2 二次开发，原项目协议 MIT**
 
-# 蓝眼云盘（4.1.2）
-[在线Demo](https://tanker.eyeblue.cn) (体验账号： demo 密码：123456)
+## 简介 
 
-蓝眼云盘是蓝眼开源系列代表作品之一，致力于打造精致，优雅，简约的云盘。核心功能如下：
-1. 文件列表
-2. 文件/文件夹上传 + 拖拽上传
-3. 共享空间
-3. 文件分享
-4. 文件监控统计
-5. 回收站
-6. 多用户
-7. [WebDav](https://tank-doc.eyeblue.cn/advance/webdav.html)
-8. [扫描磁盘任务](https://tank-doc.eyeblue.cn/advance/scan.html)
-9. [在线预览及自定义配置预览引擎](https://tank-doc.eyeblue.cn/advance/preview.html)
-10. 支持Sqlite和Mysql数据库用以存储文件元信息，Sqlite可以做到开箱即用。
+TankSubmBox 是一个轻量级竞赛作品提交审核系统，适用于创新创业训练、大作业文件等作品提交审核评分。可像网盘一样方便地上传和修改作品。
 
+- 学生：上传文件，选择学院和赛道。每个学生在文件夹里上传文件以后，为文件夹打上标签，表明这些文件属于哪个组和赛道。
+- 组（如学院）管理员：查看本组的所有作品。为满意的作品文件夹再打上标签，说明这是学院向上推荐的。
+- 评委：评委可以看到所有学院向上推荐的作品，可以根据标签筛选赛道和学院，可以打上标签表明打分。
 
-[更多内容请移步至文档](https://tank-doc.eyeblue.cn/)
+例如
+- **管理员**
 
-### 软件截图
+设置普通用户填写标签字段为“赛道”，学院管理员用户标签字段为“推荐”，评委用户标签字段为“评分”。
 
-#### PC端截图
-
-![](./build/doc/img/tank0.png)
-
-![](./build/doc/img/tank1.png)
-
-![](./build/doc/img/tank2.png)
-
-#### 手机端截图
-
-![](./build/doc/img/mobile.png)
-
-
-## [安装文档](https://tank-doc.eyeblue.cn/basic/install.html)
-
-### 快速运行
-安装依赖
-```shell
-go mod tidy
+- **小明（计算机学院，选择人工智能赛道）**
 ```
-运行main文件即可：
-```shell
-./main.go
+小明的个人空间/
+└── 参赛项目文件夹/  [组：计算机学院，标签: 人工智能赛道]
+    ├── 项目计划书v2.0.pdf
+    ├── 核心算法代码.py
+    ├── 数据集样本.xlsx
+    └── 项目演示短视频.mp4
 ```
 
-### Contribution
-
-感谢所有蓝眼云盘的贡献者 [@zicla](https://github.com/zicla)，[@seaheart](https://github.com/seaheart)，[@yemuhe](https://github.com/yemuhe)，[@hxsherry](https://github.com/hxsherry)
-
-如果您也想参与进来，请尽情的fork, star, post issue, pull requests
-
-当然你可以加入钉钉群（一群已满员）一起直接交流，在钉钉群中可以获取最新beta版本。
-
-![](./build/doc/img/dingding.jpeg)
-
-群号：44754005
+- **小红（电子工程学院，选择智能硬件赛道）**
+```
+小红的个人空间/
+└── 参赛作品文件夹/  [组：电子工程学院，标签: 智能硬件赛道]
+    ├── 电路设计原理图.png
+    ├── 3D结构模型.stl
+    ├── 功能测试记录表.docx
+    └── 实物组装教程.mp4
+```
 
 
-### Support
-IDE for this project is supported by [Jetbrains](https://jb.gg/OpenSourceSupport).
+- **计算机学院管理员**
+```
+计算机学院管理后台/
+├── 人工智能赛道/
+│   └── 小明的参赛项目文件夹/  [组：计算机学院, 标签：人工智能赛道, 学院推荐]
+│       ├── 项目计划书v2.0.pdf
+│       ├── 核心算法代码.py
+│       ├── 数据集样本.xlsx
+│       └── 项目演示短视频.mp4
+└── 软件开发赛道/
+    └── （其他未推荐作品）
+```
 
-[![](./build/doc/img/jb_beam.png)](https://jb.gg/OpenSourceSupport)
+- **电子工程学院管理员**
+```
+电子工程学院管理后台/
+├── 智能硬件赛道/
+│   └── 小红的参赛作品文件夹/  [组: 电子工程学院, 标签：智能硬件赛道, 学院推荐]
+│       ├── 电路设计原理图.png
+│       ├── 3D结构模型.stl
+│       ├── 功能测试记录表.docx
+│       └── 实物组装教程.mp4
+└── 通信技术赛道/
+    └── （其他未推荐作品）
+```
 
+- **评委后台：**
 
-### License
+```
+评委评审后台/
+├── 按赛道分类/
+│   ├── 人工智能赛道/
+│   │   └── 小明的参赛项目文件夹/  [组: 计算机学院, 标签：人工智能赛道, 学院推荐, 得分 92]
+│   │       ├── 项目计划书v2.0.pdf
+│   │       ├── 核心算法代码.py
+│   │       ├── 数据集样本.xlsx
+│   │       └── 项目演示短视频.mp4
+│   └── 智能硬件赛道/
+│       └── 小红的参赛作品文件夹/  [组: 电子工程学院, 标签：智能硬件赛道, 学院推荐, 得分 88]
+│           ├── 电路设计原理图.png
+│           ├── 3D结构模型.stl
+│           ├── 功能测试记录表.docx
+│           └── 实物组装教程.mp4
+└── 按学院分类/
+    ├── 计算机学院/
+    │   └── 小明的参赛项目文件夹（同上）
+    └── 电子工程学院/
+        └── 小红的参赛作品文件夹（同上）
+```
 
-[MIT](http://opensource.org/licenses/MIT)
+## 构建
 
-Copyright (c) 2017-present, eyeblue.cn
+在源码目录下运行 `make build` 构建，`make run` 构建并运行。

@@ -1,12 +1,13 @@
 package rest
 
 import (
+	"math"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/uuid"
-	"math"
-	"time"
 )
 
 type UserDao struct {
@@ -108,11 +109,11 @@ func (this *UserDao) PlainPage(page int, pageSize int, username string, status s
 	var wp = &builder.WherePair{}
 
 	if username != "" {
-		wp = wp.And(&builder.WherePair{Query: "username LIKE ?", Args: []interface{}{"%" + username + "%"}})
+		wp = wp.And(&builder.WherePair{Query: "username LIKE ?", Args: []any{"%" + username + "%"}})
 	}
 
 	if status != "" {
-		wp = wp.And(&builder.WherePair{Query: "status = ?", Args: []interface{}{status}})
+		wp = wp.And(&builder.WherePair{Query: "status = ?", Args: []any{status}})
 	}
 
 	var count int64 = 0
@@ -180,7 +181,7 @@ func (this *UserDao) Save(user *User) *User {
 func (this *UserDao) FindUsers20() []*User {
 	var users []*User
 	var wp = &builder.WherePair{}
-	wp = wp.And(&builder.WherePair{Query: "username like ?", Args: []interface{}{"%_20"}})
+	wp = wp.And(&builder.WherePair{Query: "username like ?", Args: []any{"%_20"}})
 
 	db := core.CONTEXT.GetDB().Model(&User{}).Where(wp.Query, wp.Args...).Find(&users)
 	this.PanicError(db.Error)
@@ -189,7 +190,7 @@ func (this *UserDao) FindUsers20() []*User {
 
 func (this *UserDao) DeleteUsers20() {
 	var wp = &builder.WherePair{}
-	wp = wp.And(&builder.WherePair{Query: "username like ?", Args: []interface{}{"%_20"}})
+	wp = wp.And(&builder.WherePair{Query: "username like ?", Args: []any{"%_20"}})
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args...).Delete(User{})
 	this.PanicError(db.Error)

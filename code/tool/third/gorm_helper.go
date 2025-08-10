@@ -2,7 +2,7 @@ package third
 
 import "gorm.io/gorm"
 
-//This is a nil ptr bug in gorm.io/gorm@v1.23.2/migrator/migrator.go:369
+// This is a nil ptr bug in gorm.io/gorm@v1.23.2/migrator/migrator.go:369
 func MysqlMigratorHasColumn(db *gorm.DB, schemaName string, tableName string, columnName string) bool {
 
 	var count int64

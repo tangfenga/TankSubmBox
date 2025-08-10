@@ -35,57 +35,57 @@ import (
 // In the rules, the tag of a field refers to the value associated with the
 // key 'xml' in the struct field's tag (see the example above).
 //
-//   * If the struct has a field of type []byte or string with tag
-//      ",innerxml", Unmarshal accumulates the raw XML nested inside the
-//      element in that field. The rest of the rules still apply.
+//   - If the struct has a field of type []byte or string with tag
+//     ",innerxml", Unmarshal accumulates the raw XML nested inside the
+//     element in that field. The rest of the rules still apply.
 //
-//   * If the struct has a field named XMLName of type xml.Name,
-//      Unmarshal records the element name in that field.
+//   - If the struct has a field named XMLName of type xml.Name,
+//     Unmarshal records the element name in that field.
 //
-//   * If the XMLName field has an associated tag of the form
-//      "name" or "namespace-URL name", the XML element must have
-//      the given name (and, optionally, name space) or else Unmarshal
-//      returns an error.
+//   - If the XMLName field has an associated tag of the form
+//     "name" or "namespace-URL name", the XML element must have
+//     the given name (and, optionally, name space) or else Unmarshal
+//     returns an error.
 //
-//   * If the XML element has an attribute whose name matches a
-//      struct field name with an associated tag containing ",attr" or
-//      the explicit name in a struct field tag of the form "name,attr",
-//      Unmarshal records the attribute value in that field.
+//   - If the XML element has an attribute whose name matches a
+//     struct field name with an associated tag containing ",attr" or
+//     the explicit name in a struct field tag of the form "name,attr",
+//     Unmarshal records the attribute value in that field.
 //
-//   * If the XML element contains character data, that data is
-//      accumulated in the first struct field that has tag ",chardata".
-//      The struct field may have type []byte or string.
-//      If there is no such field, the character data is discarded.
+//   - If the XML element contains character data, that data is
+//     accumulated in the first struct field that has tag ",chardata".
+//     The struct field may have type []byte or string.
+//     If there is no such field, the character data is discarded.
 //
-//   * If the XML element contains comments, they are accumulated in
-//      the first struct field that has tag ",comment".  The struct
-//      field may have type []byte or string. If there is no such
-//      field, the comments are discarded.
+//   - If the XML element contains comments, they are accumulated in
+//     the first struct field that has tag ",comment".  The struct
+//     field may have type []byte or string. If there is no such
+//     field, the comments are discarded.
 //
-//   * If the XML element contains a sub-element whose name matches
-//      the prefix of a tag formatted as "a" or "a>b>c", unmarshal
-//      will descend into the XML structure looking for elements with the
-//      given names, and will map the innermost elements to that struct
-//      field. A tag starting with ">" is equivalent to one starting
-//      with the field name followed by ">".
+//   - If the XML element contains a sub-element whose name matches
+//     the prefix of a tag formatted as "a" or "a>b>c", unmarshal
+//     will descend into the XML structure looking for elements with the
+//     given names, and will map the innermost elements to that struct
+//     field. A tag starting with ">" is equivalent to one starting
+//     with the field name followed by ">".
 //
-//   * If the XML element contains a sub-element whose name matches
-//      a struct field's XMLName tag and the struct field has no
-//      explicit name tag as per the previous rule, unmarshal maps
-//      the sub-element to that struct field.
+//   - If the XML element contains a sub-element whose name matches
+//     a struct field's XMLName tag and the struct field has no
+//     explicit name tag as per the previous rule, unmarshal maps
+//     the sub-element to that struct field.
 //
-//   * If the XML element contains a sub-element whose name matches a
-//      field without any mode flags (",attr", ",chardata", etc), Unmarshal
-//      maps the sub-element to that struct field.
+//   - If the XML element contains a sub-element whose name matches a
+//     field without any mode flags (",attr", ",chardata", etc), Unmarshal
+//     maps the sub-element to that struct field.
 //
-//   * If the XML element contains a sub-element that hasn't matched any
-//      of the above rules and the struct has a field with tag ",any",
-//      unmarshal maps the sub-element to that struct field.
+//   - If the XML element contains a sub-element that hasn't matched any
+//     of the above rules and the struct has a field with tag ",any",
+//     unmarshal maps the sub-element to that struct field.
 //
-//   * An anonymous struct field is handled as if the fields of its
-//      value were part of the outer struct.
+//   - An anonymous struct field is handled as if the fields of its
+//     value were part of the outer struct.
 //
-//   * A struct field with tag "-" is never unmarshalled into.
+//   - A struct field with tag "-" is never unmarshalled into.
 //
 // Unmarshal maps an XML element to a string or []byte by saving the
 // concatenation of that element's character data in the string or
@@ -110,14 +110,13 @@ import (
 //
 // Unmarshal maps an XML element to a pointer by setting the pointer
 // to a freshly allocated value and then mapping the element to that value.
-//
-func Unmarshal(data []byte, v interface{}) error {
+func Unmarshal(data []byte, v any) error {
 	return NewDecoder(bytes.NewReader(data)).Decode(v)
 }
 
 // Decode works like xml.Unmarshal, except it reads the decoder
 // stream to find the start element.
-func (d *Decoder) Decode(v interface{}) error {
+func (d *Decoder) Decode(v any) error {
 	return d.DecodeElement(v, nil)
 }
 
@@ -125,7 +124,7 @@ func (d *Decoder) Decode(v interface{}) error {
 // a pointer to the start XML element to decode into v.
 // It is useful when a client reads some raw XML tokens itself
 // but also wants to defer to Unmarshal for some elements.
-func (d *Decoder) DecodeElement(v interface{}, start *StartElement) error {
+func (d *Decoder) DecodeElement(v any, start *StartElement) error {
 	val := reflect.ValueOf(v)
 	if val.Kind() != reflect.Ptr {
 		return errors.New("non-pointer passed to Unmarshal")
@@ -170,7 +169,7 @@ type UnmarshalerAttr interface {
 }
 
 // receiverType returns the receiver type to use in an expression like "%s.MethodName".
-func receiverType(val interface{}) string {
+func receiverType(val any) string {
 	t := reflect.TypeOf(val)
 	if t.Name() != "" {
 		return t.String()

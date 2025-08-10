@@ -1,19 +1,20 @@
 package rest
 
 import (
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type BridgeDao struct {
 	BaseDao
 }
 
-//find by uuid. if not found return nil.
+// find by uuid. if not found return nil.
 func (this *BridgeDao) FindByUuid(uuid string) *Bridge {
 
 	var bridge = &Bridge{}
@@ -29,7 +30,7 @@ func (this *BridgeDao) FindByUuid(uuid string) *Bridge {
 
 }
 
-//find by uuid. if not found panic NotFound error
+// find by uuid. if not found panic NotFound error
 func (this *BridgeDao) CheckByUuid(uuid string) *Bridge {
 
 	entity := this.FindByUuid(uuid)
@@ -41,7 +42,7 @@ func (this *BridgeDao) CheckByUuid(uuid string) *Bridge {
 
 }
 
-//find by shareUuid and matterUuid. if not found panic NotFound error.
+// find by shareUuid and matterUuid. if not found panic NotFound error.
 func (this *BridgeDao) CheckByShareUuidAndMatterUuid(shareUuid string, matterUuid string) *Bridge {
 
 	var bridge = &Bridge{}
@@ -57,17 +58,16 @@ func (this *BridgeDao) CheckByShareUuidAndMatterUuid(shareUuid string, matterUui
 	return bridge
 }
 
-//get pager
+// get pager
 func (this *BridgeDao) PlainPage(page int, pageSize int, shareUuid string, sortArray []builder.OrderPair) (int, []*Bridge) {
 
 	var wp = &builder.WherePair{}
 
 	if shareUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "share_uuid = ?", Args: []interface{}{shareUuid}})
+		wp = wp.And(&builder.WherePair{Query: "share_uuid = ?", Args: []any{shareUuid}})
 	}
 
-	var conditionDB *gorm.DB
-	conditionDB = core.CONTEXT.GetDB().Model(&Bridge{}).Where(wp.Query, wp.Args...)
+	var conditionDB *gorm.DB = core.CONTEXT.GetDB().Model(&Bridge{}).Where(wp.Query, wp.Args...)
 
 	var count int64 = 0
 	db := conditionDB.Count(&count)
@@ -80,7 +80,7 @@ func (this *BridgeDao) PlainPage(page int, pageSize int, shareUuid string, sortA
 	return int(count), bridges
 }
 
-//get pager
+// get pager
 func (this *BridgeDao) Page(page int, pageSize int, shareUuid string, sortArray []builder.OrderPair) *Pager {
 
 	count, bridges := this.PlainPage(page, pageSize, shareUuid, sortArray)
@@ -121,7 +121,7 @@ func (this *BridgeDao) DeleteByMatterUuid(matterUuid string) {
 
 	var wp = &builder.WherePair{}
 
-	wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []interface{}{matterUuid}})
+	wp = wp.And(&builder.WherePair{Query: "matter_uuid = ?", Args: []any{matterUuid}})
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args).Delete(Bridge{})
 	this.PanicError(db.Error)
@@ -131,7 +131,7 @@ func (this *BridgeDao) DeleteByShareUuid(shareUuid string) {
 
 	var wp = &builder.WherePair{}
 
-	wp = wp.And(&builder.WherePair{Query: "share_uuid = ?", Args: []interface{}{shareUuid}})
+	wp = wp.And(&builder.WherePair{Query: "share_uuid = ?", Args: []any{shareUuid}})
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args).Delete(Bridge{})
 	this.PanicError(db.Error)

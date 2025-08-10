@@ -1,15 +1,16 @@
 package rest
 
 import (
+	"math"
+	"os"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/util"
 	"github.com/eyebluecn/tank/code/tool/uuid"
 	"gorm.io/gorm"
-	"math"
-	"os"
-	"time"
 )
 
 type MatterDao struct {
@@ -116,14 +117,14 @@ func (this *MatterDao) FindByUserUuidAndPuuidAndDirTrue(userUuid string, puuid s
 	var wp = &builder.WherePair{}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
-	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{1}})
+	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{1}})
 
 	var matters []*Matter
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).First(&matters)
@@ -153,18 +154,18 @@ func (this *MatterDao) CountByUserUuidAndPuuidAndDirAndName(userUuid string, puu
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []interface{}{name}})
+		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []any{name}})
 	}
 
-	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{dir}})
+	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{dir}})
 
 	db := core.CONTEXT.GetDB().
 		Model(&matter).
@@ -183,18 +184,18 @@ func (this *MatterDao) CountBySpaceUuidAndPuuidAndDirAndName(spaceUuid string, p
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if spaceUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []interface{}{spaceUuid}})
+		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []any{spaceUuid}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []interface{}{name}})
+		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []any{name}})
 	}
 
-	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{dir}})
+	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{dir}})
 
 	db := core.CONTEXT.GetDB().
 		Model(&matter).
@@ -211,18 +212,18 @@ func (this *MatterDao) FindBySpaceUuidAndPuuidAndDirAndName(spaceUuid string, pu
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if spaceUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []interface{}{spaceUuid}})
+		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []any{spaceUuid}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []interface{}{name}})
+		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []any{name}})
 	}
 
-	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{dir}})
+	wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{dir}})
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args...).First(matter)
 
@@ -244,21 +245,21 @@ func (this *MatterDao) FindByUserUuidAndPuuidAndDirAndName(userUuid string, puui
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []interface{}{name}})
+		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []any{name}})
 	}
 
 	if dir == TRUE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{true}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{true}})
 	} else if dir == FALSE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{false}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{false}})
 	}
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args...).First(matter)
@@ -281,21 +282,21 @@ func (this *MatterDao) FindBySpaceNameAndPuuidAndDirAndName(spaceName string, pu
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if spaceName != "" {
-		wp = wp.And(&builder.WherePair{Query: "space_name = ?", Args: []interface{}{spaceName}})
+		wp = wp.And(&builder.WherePair{Query: "space_name = ?", Args: []any{spaceName}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []interface{}{name}})
+		wp = wp.And(&builder.WherePair{Query: "name = ?", Args: []any{name}})
 	}
 
 	if dir == TRUE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{true}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{true}})
 	} else if dir == FALSE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{false}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{false}})
 	}
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args...).First(matter)
@@ -319,11 +320,11 @@ func (this *MatterDao) FindByPuuidAndUserUuidAndDeleted(puuid string, userUuid s
 	var matters []*Matter
 
 	var wp = &builder.WherePair{}
-	wp = wp.And(&builder.WherePair{Query: "puuid = ? AND user_uuid = ?", Args: []interface{}{puuid, userUuid}})
+	wp = wp.And(&builder.WherePair{Query: "puuid = ? AND user_uuid = ?", Args: []any{puuid, userUuid}})
 	if deleted == TRUE {
-		wp = wp.And(&builder.WherePair{Query: "deleted = 1", Args: []interface{}{}})
+		wp = wp.And(&builder.WherePair{Query: "deleted = 1", Args: []any{}})
 	} else if deleted == FALSE {
-		wp = wp.And(&builder.WherePair{Query: "deleted = 0", Args: []interface{}{}})
+		wp = wp.And(&builder.WherePair{Query: "deleted = 0", Args: []any{}})
 	}
 
 	if sortArray == nil {
@@ -372,35 +373,35 @@ func (this *MatterDao) PlainPage(
 	var wp = &builder.WherePair{}
 
 	if puuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []interface{}{puuid}})
+		wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
 	}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	if spaceUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []interface{}{spaceUuid}})
+		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []any{spaceUuid}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []interface{}{"%" + name + "%"}})
+		wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%" + name + "%"}})
 	}
 
 	if deleteTimeBefore != nil {
-		wp = wp.And(&builder.WherePair{Query: "delete_time < ?", Args: []interface{}{&deleteTimeBefore}})
+		wp = wp.And(&builder.WherePair{Query: "delete_time < ?", Args: []any{&deleteTimeBefore}})
 	}
 
 	if dir == TRUE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{1}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{1}})
 	} else if dir == FALSE {
-		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []interface{}{0}})
+		wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{0}})
 	}
 
 	if deleted == TRUE {
-		wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []interface{}{1}})
+		wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []any{1}})
 	} else if deleted == FALSE {
-		wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []interface{}{0}})
+		wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []any{0}})
 	}
 
 	var conditionDB *gorm.DB
@@ -408,7 +409,7 @@ func (this *MatterDao) PlainPage(
 		var orWp = &builder.WherePair{}
 
 		for _, v := range extensions {
-			orWp = orWp.Or(&builder.WherePair{Query: "name LIKE ?", Args: []interface{}{"%." + v}})
+			orWp = orWp.Or(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%." + v}})
 		}
 
 		conditionDB = core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Where(orWp.Query, orWp.Args...)
@@ -494,13 +495,13 @@ func (this *MatterDao) Save(matter *Matter) *Matter {
 
 // download time add 1
 func (this *MatterDao) TimesIncrement(matterUuid string) {
-	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matterUuid).Updates(map[string]interface{}{"times": gorm.Expr("times + 1"), "visit_time": time.Now()})
+	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matterUuid).Updates(map[string]any{"times": gorm.Expr("times + 1"), "visit_time": time.Now()})
 	this.PanicError(db.Error)
 }
 
 func (this *MatterDao) SizeByPuuidAndUserUuid(matterUuid string, userUuid string) int64 {
 
-	var wp = &builder.WherePair{Query: "puuid = ? AND user_uuid = ?", Args: []interface{}{matterUuid, userUuid}}
+	var wp = &builder.WherePair{Query: "puuid = ? AND user_uuid = ?", Args: []any{matterUuid, userUuid}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -520,7 +521,7 @@ func (this *MatterDao) SizeByPuuidAndUserUuid(matterUuid string, userUuid string
 
 func (this *MatterDao) SizeByPuuidAndSpaceUuid(matterUuid string, spaceUuid string) int64 {
 
-	var wp = &builder.WherePair{Query: "puuid = ? AND space_uuid = ?", Args: []interface{}{matterUuid, spaceUuid}}
+	var wp = &builder.WherePair{Query: "puuid = ? AND space_uuid = ?", Args: []any{matterUuid, spaceUuid}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -582,7 +583,7 @@ func (this *MatterDao) Delete(matter *Matter) {
 func (this *MatterDao) SoftDelete(matter *Matter) {
 
 	//soft delete from db.
-	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matter.Uuid).Updates(map[string]interface{}{"deleted": true, "delete_time": time.Now()})
+	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matter.Uuid).Updates(map[string]any{"deleted": true, "delete_time": time.Now()})
 	this.PanicError(db.Error)
 
 }
@@ -591,7 +592,7 @@ func (this *MatterDao) SoftDelete(matter *Matter) {
 func (this *MatterDao) Recovery(matter *Matter) {
 
 	//recovery from db.
-	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matter.Uuid).Updates(map[string]interface{}{"deleted": false, "delete_time": time.Now()})
+	db := core.CONTEXT.GetDB().Model(&Matter{}).Where("uuid = ?", matter.Uuid).Updates(map[string]any{"deleted": false, "delete_time": time.Now()})
 	this.PanicError(db.Error)
 
 }
@@ -612,7 +613,7 @@ func (this *MatterDao) CountBetweenTime(startTime time.Time, endTime time.Time) 
 
 func (this *MatterDao) SizeBetweenTime(startTime time.Time, endTime time.Time) int64 {
 
-	var wp = &builder.WherePair{Query: "dir = 0 AND create_time >= ? AND create_time <= ?", Args: []interface{}{startTime, endTime}}
+	var wp = &builder.WherePair{Query: "dir = 0 AND create_time >= ? AND create_time <= ?", Args: []any{startTime, endTime}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -632,7 +633,7 @@ func (this *MatterDao) SizeBetweenTime(startTime time.Time, endTime time.Time) i
 // find by userUuid and path. if not found, return nil
 func (this *MatterDao) findByUserUuidAndPath(userUuid string, path string) *Matter {
 
-	var wp = &builder.WherePair{Query: "user_uuid = ? AND path = ?", Args: []interface{}{userUuid, path}}
+	var wp = &builder.WherePair{Query: "user_uuid = ? AND path = ?", Args: []any{userUuid, path}}
 
 	var matter = &Matter{}
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).First(matter)
@@ -664,7 +665,7 @@ func (this *MatterDao) checkByUserUuidAndPath(userUuid string, path string) *Mat
 
 func (this *MatterDao) SumSizeByUserUuidAndPath(userUuid string, path string) int64 {
 
-	var wp = &builder.WherePair{Query: "user_uuid = ? AND path like ?", Args: []interface{}{userUuid, path + "%"}}
+	var wp = &builder.WherePair{Query: "user_uuid = ? AND path like ?", Args: []any{userUuid, path + "%"}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -690,7 +691,7 @@ func (this *MatterDao) UpdateSize(matterUuid string, size int64) {
 
 func (this *MatterDao) CountByUserUuidAndPath(userUuid string, path string) int64 {
 
-	var wp = &builder.WherePair{Query: "user_uuid = ? AND path like ?", Args: []interface{}{userUuid, path + "%"}}
+	var wp = &builder.WherePair{Query: "user_uuid = ? AND path like ?", Args: []any{userUuid, path + "%"}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)
@@ -702,7 +703,7 @@ func (this *MatterDao) CountByUserUuidAndPath(userUuid string, path string) int6
 
 func (this *MatterDao) CountByUserUuid(userUuid string) int64 {
 
-	var wp = &builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}}
+	var wp = &builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}}
 
 	var count int64
 	db := core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Count(&count)

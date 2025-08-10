@@ -2,14 +2,14 @@ package core
 
 //the global variables in the application.
 
-//application
+// application
 var APPLICATION Application
 
-//logger
+// logger
 var LOGGER Logger
 
-//config
+// config
 var CONFIG Config
 
-//context
+// context
 var CONTEXT Context

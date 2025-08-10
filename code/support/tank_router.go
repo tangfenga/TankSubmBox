@@ -67,7 +67,7 @@ func NewRouter() *TankRouter {
 
 }
 
-//catch global panic.
+// catch global panic.
 func (this *TankRouter) GlobalPanicHandler(writer http.ResponseWriter, request *http.Request, startTime time.Time) {
 	if err := recover(); err != nil {
 
@@ -125,14 +125,14 @@ func (this *TankRouter) GlobalPanicHandler(writer http.ResponseWriter, request *
 		b, _ := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(webResult)
 
 		//write to writer.
-		_, err := fmt.Fprintf(writer, string(b))
+		_, err := fmt.Fprint(writer, string(b))
 		if err != nil {
 			fmt.Printf("occur error while write response %s\r\n", err.Error())
 		}
 
 		//log error.
 		go core.RunWithRecovery(func() {
-			this.footprintService.Trace(request, time.Now().Sub(startTime), false)
+			this.footprintService.Trace(request, time.Since(startTime), false)
 		})
 	}
 }
@@ -178,7 +178,7 @@ func (this *TankRouter) ServeHTTP(writer http.ResponseWriter, request *http.Requ
 
 			//log the request
 			go core.RunWithRecovery(func() {
-				this.footprintService.Trace(request, time.Now().Sub(startTime), true)
+				this.footprintService.Trace(request, time.Since(startTime), true)
 			})
 
 		} else {

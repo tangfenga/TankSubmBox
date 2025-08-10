@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-//human readable file size
+// human readable file size
 func HumanFileSize(bytes int64) string {
 	var thresh int64 = 1024
 
@@ -32,7 +32,7 @@ func HumanFileSize(bytes int64) string {
 	return fmt.Sprintf("%s%s", numStr, units[u])
 }
 
-//get mysql url.
+// get mysql url.
 func GetMysqlUrl(
 	mysqlPort int,
 	mysqlHost string,
@@ -48,12 +48,12 @@ func GetMysqlUrl(
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", mysqlUsername, mysqlPassword, mysqlHost, mysqlPort, mysqlSchema, mysqlCharset)
 }
 
-//get random number 4.
+// get random number 4.
 func RandomNumber4() string {
 	return fmt.Sprintf("%04v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31()%10000)
 }
 
-//get random 4 string
+// get random 4 string
 func RandomString4() string {
 
 	//0 and o, 1 and l are not easy to distinguish

@@ -2,14 +2,15 @@ package support
 
 import (
 	"fmt"
-	"github.com/eyebluecn/tank/code/core"
-	"github.com/eyebluecn/tank/code/tool/util"
-	"github.com/robfig/cron/v3"
 	"log"
 	"os"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/eyebluecn/tank/code/core"
+	"github.com/eyebluecn/tank/code/tool/util"
+	"github.com/robfig/cron/v3"
 )
 
 type TankLogger struct {
@@ -38,8 +39,8 @@ func (this *TankLogger) Destroy() {
 	this.closeFile()
 }
 
-//uniform log method
-func (this *TankLogger) Log(prefix string, format string, v ...interface{}) {
+// uniform log method
+func (this *TankLogger) Log(prefix string, format string, v ...any) {
 
 	content := fmt.Sprintf(format+"\r\n", v...)
 
@@ -51,7 +52,7 @@ func (this *TankLogger) Log(prefix string, format string, v ...interface{}) {
 	}
 
 	var consoleFormat = fmt.Sprintf("%s%s %s:%d %s", prefix, util.ConvertTimeToTimeString(time.Now()), util.GetFilenameOfPath(file), line, content)
-	fmt.Printf(consoleFormat)
+	fmt.Print(consoleFormat)
 
 	this.goLogger.SetPrefix(prefix)
 
@@ -61,29 +62,29 @@ func (this *TankLogger) Log(prefix string, format string, v ...interface{}) {
 	}
 }
 
-func (this *TankLogger) Debug(format string, v ...interface{}) {
+func (this *TankLogger) Debug(format string, v ...any) {
 	this.Log("[DEBUG]", format, v...)
 }
 
-func (this *TankLogger) Info(format string, v ...interface{}) {
+func (this *TankLogger) Info(format string, v ...any) {
 	this.Log("[INFO ]", format, v...)
 }
 
-func (this *TankLogger) Warn(format string, v ...interface{}) {
+func (this *TankLogger) Warn(format string, v ...any) {
 	this.Log("[WARN ]", format, v...)
 }
 
-func (this *TankLogger) Error(format string, v ...interface{}) {
+func (this *TankLogger) Error(format string, v ...any) {
 	this.Log("[ERROR]", format, v...)
 }
 
-func (this *TankLogger) Panic(format string, v ...interface{}) {
+func (this *TankLogger) Panic(format string, v ...any) {
 	this.Log("[PANIC]", format, v...)
 	panic(fmt.Sprintf(format, v...))
 }
 
-//将日志写入到今天的日期中(该方法内必须使用异步方法记录日志，否则会引发死锁)
-//rename log file.
+// 将日志写入到今天的日期中(该方法内必须使用异步方法记录日志，否则会引发死锁)
+// rename log file.
 func (this *TankLogger) maintain() {
 
 	this.Info("maintain log")
@@ -124,12 +125,12 @@ func (this *TankLogger) maintain() {
 
 }
 
-//log file name
+// log file name
 func (this *TankLogger) fileName() string {
 	return util.GetLogPath() + "/tank.log"
 }
 
-//open log file
+// open log file
 func (this *TankLogger) openFile() {
 	// not close log file immediately
 	fmt.Printf("use log file %s\r\n", this.fileName())
@@ -147,7 +148,7 @@ func (this *TankLogger) openFile() {
 	this.file = f
 }
 
-//close log file.
+// close log file.
 func (this *TankLogger) closeFile() {
 	if this.file != nil {
 		err := this.file.Close()

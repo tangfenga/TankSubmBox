@@ -7,7 +7,7 @@ type OrderPair struct {
 
 type WherePair struct {
 	Query string
-	Args  []interface{}
+	Args  []any
 }
 
 func (this *WherePair) And(where *WherePair) *WherePair {

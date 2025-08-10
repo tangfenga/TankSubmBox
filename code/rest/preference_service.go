@@ -4,7 +4,7 @@ import (
 	"github.com/eyebluecn/tank/code/core"
 )
 
-//@Service
+// @Service
 type PreferenceService struct {
 	BaseBean
 	preferenceDao *PreferenceDao
@@ -49,14 +49,14 @@ func (this *PreferenceService) Fetch() *Preference {
 	return this.preference
 }
 
-//清空单例配置。
+// 清空单例配置。
 func (this *PreferenceService) Reset() {
 
 	this.preference = nil
 
 }
 
-//清空单例配置。
+// 清空单例配置。
 func (this *PreferenceService) Save(preference *Preference) *Preference {
 
 	preference = this.preferenceDao.Save(preference)
@@ -67,7 +67,7 @@ func (this *PreferenceService) Save(preference *Preference) *Preference {
 	return preference
 }
 
-//System cleanup.
+// System cleanup.
 func (this *PreferenceService) Cleanup() {
 
 	this.logger.Info("[PreferenceService] clean up. Delete all preference")

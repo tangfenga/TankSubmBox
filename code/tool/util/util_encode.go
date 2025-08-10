@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//md5
+// md5
 func GetMd5(raw string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(raw)))
 }

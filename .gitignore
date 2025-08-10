@@ -10,3 +10,8 @@ tank.exe
 
 # mac
 .DS_Store
+
+# runtime file
+html
+log
+conf

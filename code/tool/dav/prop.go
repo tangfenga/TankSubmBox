@@ -140,7 +140,7 @@ type Owner struct {
 	InnerXML string `xml:",innerxml"`
 }
 
-//这是一个带字节计数器的Reader，可以知道总共读取了多少个字节。
+// 这是一个带字节计数器的Reader，可以知道总共读取了多少个字节。
 type CountingReader struct {
 	n      int
 	reader io.Reader
@@ -215,7 +215,7 @@ type Propfind struct {
 	Include  PropfindProps `xml:"DAV: include"`
 }
 
-//从request中读出需要的属性。比如：getcontentlength 大小 creationdate 创建时间
+// 从request中读出需要的属性。比如：getcontentlength 大小 creationdate 创建时间
 func ReadPropfind(reader io.Reader) (propfind *Propfind) {
 	propfind = &Propfind{}
 

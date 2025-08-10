@@ -8,10 +8,10 @@ type BaseDao struct {
 	BaseBean
 }
 
-//get an order string by sortMap
+// get an order string by sortMap
 func (this *BaseDao) GetSortString(sortArray []builder.OrderPair) string {
 
-	if sortArray == nil || len(sortArray) == 0 {
+	if len(sortArray) == 0 {
 		return ""
 	}
 	str := ""

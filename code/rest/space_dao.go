@@ -2,14 +2,16 @@ package rest
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"gorm.io/gorm"
-	"math"
+
+	"time"
 
 	"github.com/eyebluecn/tank/code/tool/uuid"
-	"time"
 )
 
 type SpaceDao struct {
@@ -112,11 +114,11 @@ func (this *SpaceDao) PlainPage(page int, pageSize int, spaceType string, name s
 	var wp = &builder.WherePair{}
 
 	if spaceType != "" {
-		wp = wp.And(&builder.WherePair{Query: "type = ?", Args: []interface{}{spaceType}})
+		wp = wp.And(&builder.WherePair{Query: "type = ?", Args: []any{spaceType}})
 	}
 
 	if name != "" {
-		wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []interface{}{"%" + name + "%"}})
+		wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%" + name + "%"}})
 	}
 
 	var conditionDB *gorm.DB

@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-//cache2go https://github.com/muesli/cache2go
+// cache2go https://github.com/muesli/cache2go
 type Item struct {
 	//read write lock
 	sync.RWMutex
-	key  interface{}
-	data interface{}
+	key  any
+	data any
 	// cache duration.
 	duration time.Duration
 	// create time
@@ -23,11 +23,11 @@ type Item struct {
 	//visit times
 	count int64
 	// callback after deleting
-	deleteCallback func(key interface{})
+	deleteCallback func(key any)
 }
 
-//create item.
-func NewItem(key interface{}, duration time.Duration, data interface{}) *Item {
+// create item.
+func NewItem(key any, duration time.Duration, data any) *Item {
 	t := time.Now()
 	return &Item{
 		key:            key,
@@ -40,7 +40,7 @@ func NewItem(key interface{}, duration time.Duration, data interface{}) *Item {
 	}
 }
 
-//keep alive
+// keep alive
 func (item *Item) KeepAlive() {
 	item.Lock()
 	defer item.Unlock()
@@ -68,15 +68,15 @@ func (item *Item) Count() int64 {
 	return item.count
 }
 
-func (item *Item) Key() interface{} {
+func (item *Item) Key() any {
 	return item.key
 }
 
-func (item *Item) Data() interface{} {
+func (item *Item) Data() any {
 	return item.data
 }
 
-func (item *Item) SetDeleteCallback(f func(interface{})) {
+func (item *Item) SetDeleteCallback(f func(any)) {
 	item.Lock()
 	defer item.Unlock()
 	item.deleteCallback = f
@@ -87,12 +87,12 @@ type Table struct {
 	sync.RWMutex
 
 	//all cache items
-	items map[interface{}]*Item
+	items map[any]*Item
 	// trigger cleanup
 	cleanupTimer *time.Timer
 	// cleanup interval
 	cleanupInterval time.Duration
-	loadData        func(key interface{}, args ...interface{}) *Item
+	loadData        func(key any, args ...any) *Item
 	// callback after adding.
 	addedCallback func(item *Item)
 	// callback after deleting
@@ -105,7 +105,7 @@ func (table *Table) Count() int {
 	return len(table.items)
 }
 
-func (table *Table) Foreach(trans func(key interface{}, item *Item)) {
+func (table *Table) Foreach(trans func(key any, item *Item)) {
 	table.RLock()
 	defer table.RUnlock()
 
@@ -114,7 +114,7 @@ func (table *Table) Foreach(trans func(key interface{}, item *Item)) {
 	}
 }
 
-func (table *Table) SetDataLoader(f func(interface{}, ...interface{}) *Item) {
+func (table *Table) SetDataLoader(f func(any, ...any) *Item) {
 	table.Lock()
 	defer table.Unlock()
 	table.loadData = f
@@ -197,7 +197,7 @@ func (table *Table) checkExpire() {
 }
 
 // add item
-func (table *Table) Add(key interface{}, duration time.Duration, data interface{}) *Item {
+func (table *Table) Add(key any, duration time.Duration, data any) *Item {
 	item := NewItem(key, duration, data)
 
 	table.Lock()
@@ -220,7 +220,7 @@ func (table *Table) Add(key interface{}, duration time.Duration, data interface{
 	return item
 }
 
-func (table *Table) Delete(key interface{}) (*Item, error) {
+func (table *Table) Delete(key any) (*Item, error) {
 	table.RLock()
 	r, ok := table.items[key]
 	if !ok {
@@ -249,8 +249,8 @@ func (table *Table) Delete(key interface{}) (*Item, error) {
 	return r, nil
 }
 
-//check exist.
-func (table *Table) Exists(key interface{}) bool {
+// check exist.
+func (table *Table) Exists(key any) bool {
 	table.RLock()
 	defer table.RUnlock()
 	_, ok := table.items[key]
@@ -258,8 +258,8 @@ func (table *Table) Exists(key interface{}) bool {
 	return ok
 }
 
-//if exist, return false. if not exist add a key and return true.
-func (table *Table) NotFoundAdd(key interface{}, lifeSpan time.Duration, data interface{}) bool {
+// if exist, return false. if not exist add a key and return true.
+func (table *Table) NotFoundAdd(key any, lifeSpan time.Duration, data any) bool {
 	table.Lock()
 
 	if _, ok := table.items[key]; ok {
@@ -285,7 +285,7 @@ func (table *Table) NotFoundAdd(key interface{}, lifeSpan time.Duration, data in
 	return true
 }
 
-func (table *Table) Value(key interface{}, args ...interface{}) (*Item, error) {
+func (table *Table) Value(key any, args ...any) (*Item, error) {
 	table.RLock()
 	r, ok := table.items[key]
 	loadData := table.loadData
@@ -317,16 +317,16 @@ func (table *Table) Truncate() {
 
 	table.log("Truncate table")
 
-	table.items = make(map[interface{}]*Item)
+	table.items = make(map[any]*Item)
 	table.cleanupInterval = 0
 	if table.cleanupTimer != nil {
 		table.cleanupTimer.Stop()
 	}
 }
 
-//support table sort
+// support table sort
 type ItemPair struct {
-	Key         interface{}
+	Key         any
 	AccessCount int64
 }
 
@@ -336,7 +336,7 @@ func (p ItemPairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p ItemPairList) Len() int           { return len(p) }
 func (p ItemPairList) Less(i, j int) bool { return p[i].AccessCount > p[j].AccessCount }
 
-//return most visited.
+// return most visited.
 func (table *Table) MostAccessed(count int64) []*Item {
 	table.RLock()
 	defer table.RUnlock()
@@ -367,12 +367,12 @@ func (table *Table) MostAccessed(count int64) []*Item {
 }
 
 // print log.
-func (table *Table) log(format string, v ...interface{}) {
+func (table *Table) log(format string, v ...any) {
 	//fmt.Printf(format+"\r\n", v)
 }
 
 func NewTable() *Table {
 	return &Table{
-		items: make(map[interface{}]*Item),
+		items: make(map[any]*Item),
 	}
 }

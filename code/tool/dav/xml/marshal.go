@@ -32,33 +32,33 @@ const (
 // elements containing the data.
 //
 // The name for the XML elements is taken from, in order of preference:
-//     - the tag on the XMLName field, if the data is a struct
-//     - the value of the XMLName field of type xml.Name
-//     - the tag of the struct field used to obtain the data
-//     - the name of the struct field used to obtain the data
-//     - the name of the marshalled type
+//   - the tag on the XMLName field, if the data is a struct
+//   - the value of the XMLName field of type xml.Name
+//   - the tag of the struct field used to obtain the data
+//   - the name of the struct field used to obtain the data
+//   - the name of the marshalled type
 //
 // The XML element for a struct contains marshalled elements for each of the
 // exported fields of the struct, with these exceptions:
-//     - the XMLName field, described above, is omitted.
-//     - a field with tag "-" is omitted.
-//     - a field with tag "name,attr" becomes an attribute with
-//       the given name in the XML element.
-//     - a field with tag ",attr" becomes an attribute with the
-//       field name in the XML element.
-//     - a field with tag ",chardata" is written as character data,
-//       not as an XML element.
-//     - a field with tag ",innerxml" is written verbatim, not subject
-//       to the usual marshalling procedure.
-//     - a field with tag ",comment" is written as an XML comment, not
-//       subject to the usual marshalling procedure. It must not contain
-//       the "--" string within it.
-//     - a field with a tag including the "omitempty" option is omitted
-//       if the field value is empty. The empty values are false, 0, any
-//       nil pointer or interface value, and any array, slice, map, or
-//       string of length zero.
-//     - an anonymous struct field is handled as if the fields of its
-//       value were part of the outer struct.
+//   - the XMLName field, described above, is omitted.
+//   - a field with tag "-" is omitted.
+//   - a field with tag "name,attr" becomes an attribute with
+//     the given name in the XML element.
+//   - a field with tag ",attr" becomes an attribute with the
+//     field name in the XML element.
+//   - a field with tag ",chardata" is written as character data,
+//     not as an XML element.
+//   - a field with tag ",innerxml" is written verbatim, not subject
+//     to the usual marshalling procedure.
+//   - a field with tag ",comment" is written as an XML comment, not
+//     subject to the usual marshalling procedure. It must not contain
+//     the "--" string within it.
+//   - a field with a tag including the "omitempty" option is omitted
+//     if the field value is empty. The empty values are false, 0, any
+//     nil pointer or interface value, and any array, slice, map, or
+//     string of length zero.
+//   - an anonymous struct field is handled as if the fields of its
+//     value were part of the outer struct.
 //
 // If a field uses a tag "a>b>c", then the element c will be nested inside
 // parent elements a and b. Fields that appear next to each other that name
@@ -67,7 +67,7 @@ const (
 // See MarshalIndent for an example.
 //
 // Marshal will return an error if asked to marshal a channel, function, or map.
-func Marshal(v interface{}) ([]byte, error) {
+func Marshal(v any) ([]byte, error) {
 	var b bytes.Buffer
 	if err := NewEncoder(&b).Encode(v); err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ type MarshalerAttr interface {
 // MarshalIndent works like Marshal, but each XML element begins on a new
 // indented line that starts with prefix and is followed by one or more
 // copies of indent according to the nesting depth.
-func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
+func MarshalIndent(v any, prefix, indent string) ([]byte, error) {
 	var b bytes.Buffer
 	enc := NewEncoder(&b)
 	enc.Indent(prefix, indent)
@@ -149,7 +149,7 @@ func (enc *Encoder) Indent(prefix, indent string) {
 // of Go values to XML.
 //
 // Encode calls Flush before returning.
-func (enc *Encoder) Encode(v interface{}) error {
+func (enc *Encoder) Encode(v any) error {
 	err := enc.p.marshalValue(reflect.ValueOf(v), nil, nil)
 	if err != nil {
 		return err
@@ -164,7 +164,7 @@ func (enc *Encoder) Encode(v interface{}) error {
 // of Go values to XML.
 //
 // EncodeElement calls Flush before returning.
-func (enc *Encoder) EncodeElement(v interface{}, start StartElement) error {
+func (enc *Encoder) EncodeElement(v any, start StartElement) error {
 	err := enc.p.marshalValue(reflect.ValueOf(v), nil, &start)
 	if err != nil {
 		return err

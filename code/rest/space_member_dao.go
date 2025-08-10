@@ -6,8 +6,9 @@ import (
 	"github.com/eyebluecn/tank/code/tool/result"
 	"gorm.io/gorm"
 
-	"github.com/eyebluecn/tank/code/tool/uuid"
 	"time"
+
+	"github.com/eyebluecn/tank/code/tool/uuid"
 )
 
 type SpaceMemberDao struct {
@@ -65,7 +66,7 @@ func (this *SpaceMemberDao) PlainPage(page int, pageSize int, spaceUuid string, 
 	var wp = &builder.WherePair{}
 
 	if spaceUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []interface{}{spaceUuid}})
+		wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []any{spaceUuid}})
 	}
 
 	var conditionDB *gorm.DB
@@ -115,7 +116,7 @@ func (this *SpaceMemberDao) DeleteBySpaceUuid(spaceUuid string) {
 
 	var wp = &builder.WherePair{}
 
-	wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []interface{}{spaceUuid}})
+	wp = wp.And(&builder.WherePair{Query: "space_uuid = ?", Args: []any{spaceUuid}})
 
 	db := core.CONTEXT.GetDB().Where(wp.Query, wp.Args).Delete(SpaceMember{})
 	this.PanicError(db.Error)

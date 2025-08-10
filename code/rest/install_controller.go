@@ -2,6 +2,14 @@ package rest
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"regexp"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/i18n"
@@ -14,13 +22,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"log"
-	"net/http"
-	"os"
-	"regexp"
-	"strconv"
-	"sync"
-	"time"
 )
 
 // install apis. Only when installing period can be visited.
@@ -32,7 +33,7 @@ type InstallController struct {
 	matterService     *MatterService
 	imageCacheDao     *ImageCacheDao
 	imageCacheService *ImageCacheService
-	tableNames        []interface{}
+	tableNames        []any
 }
 
 func (this *InstallController) Init() {
@@ -68,7 +69,7 @@ func (this *InstallController) Init() {
 		this.imageCacheService = c
 	}
 
-	this.tableNames = []interface{}{
+	this.tableNames = []any{
 		&Dashboard{},
 		&Bridge{},
 		&DownloadToken{},
@@ -176,7 +177,7 @@ func (this *InstallController) closeDbConnection(db *gorm.DB) {
 }
 
 // (tableName, exists, allFields, missingFields)
-func (this *InstallController) getTableMeta(gormDb *gorm.DB, entity interface{}) (string, bool, []*InstallFieldInfo, []*InstallFieldInfo) {
+func (this *InstallController) getTableMeta(gormDb *gorm.DB, entity any) (string, bool, []*InstallFieldInfo, []*InstallFieldInfo) {
 
 	//get all useful fields from model.
 	entitySchema, err := schema.Parse(entity, &sync.Map{}, core.CONFIG.NamingStrategy())
@@ -334,7 +335,7 @@ func (this *InstallController) AdminList(writer http.ResponseWriter, request *ht
 
 	var wp = &builder.WherePair{}
 
-	wp = wp.And(&builder.WherePair{Query: "role = ?", Args: []interface{}{USER_ROLE_ADMINISTRATOR}})
+	wp = wp.And(&builder.WherePair{Query: "role = ?", Args: []any{USER_ROLE_ADMINISTRATOR}})
 
 	var users []*User
 	db = db.Where(wp.Query, wp.Args...).Offset(0).Limit(10).Find(&users)

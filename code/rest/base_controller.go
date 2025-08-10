@@ -2,13 +2,14 @@ package rest
 
 import (
 	"fmt"
+	"go/types"
+	"net/http"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/i18n"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/util"
-	"github.com/json-iterator/go"
-	"go/types"
-	"net/http"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type BaseController struct {
@@ -92,7 +93,7 @@ func (this *BaseController) Wrap(f func(writer http.ResponseWriter, request *htt
 
 			writer.WriteHeader(result.FetchHttpStatus(webResult.Code))
 
-			_, err = fmt.Fprintf(writer, string(b))
+			_, err = fmt.Fprint(writer, string(b))
 			this.PanicError(err)
 		}
 
@@ -132,7 +133,7 @@ func (this *BaseController) WrapPure(f func(writer http.ResponseWriter, request 
 
 			writer.WriteHeader(result.FetchHttpStatus(webResult.Code))
 
-			_, err = fmt.Fprintf(writer, string(b))
+			_, err = fmt.Fprint(writer, string(b))
 			this.PanicError(err)
 		}
 
@@ -143,7 +144,7 @@ func (this *BaseController) WrapPure(f func(writer http.ResponseWriter, request 
 }
 
 // response a success result. 1.string 2. WebResult 3.nil pointer 4.any type
-func (this *BaseController) Success(data interface{}) *result.WebResult {
+func (this *BaseController) Success(data any) *result.WebResult {
 	var webResult *result.WebResult = nil
 	if value, ok := data.(string); ok {
 		//a simple message

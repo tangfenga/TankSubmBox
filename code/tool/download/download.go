@@ -42,7 +42,7 @@ func (w *CountingWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-//检查Last-Modified头。返回true: 请求已经完成了。（言下之意，文件没有修改过） 返回false：文件修改过。
+// 检查Last-Modified头。返回true: 请求已经完成了。（言下之意，文件没有修改过） 返回false：文件修改过。
 func CheckLastModified(w http.ResponseWriter, r *http.Request, modifyTime time.Time) bool {
 	if modifyTime.IsZero() {
 		return false
@@ -212,7 +212,7 @@ func PanicError(err error) {
 	}
 }
 
-//file download. https://github.com/Masterminds/go-fileserver
+// file download. https://github.com/Masterminds/go-fileserver
 func DownloadFile(
 	writer http.ResponseWriter,
 	request *http.Request,

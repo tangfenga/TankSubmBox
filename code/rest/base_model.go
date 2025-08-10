@@ -15,16 +15,16 @@ const (
 	EMPTY_JSON_ARRAY = "[]"
 )
 
-//pager
+// pager
 type Pager struct {
-	Page       int         `json:"page"`
-	PageSize   int         `json:"pageSize"`
-	TotalItems int         `json:"totalItems"`
-	TotalPages int         `json:"totalPages"`
-	Data       interface{} `json:"data"`
+	Page       int `json:"page"`
+	PageSize   int `json:"pageSize"`
+	TotalItems int `json:"totalItems"`
+	TotalPages int `json:"totalPages"`
+	Data       any `json:"data"`
 }
 
-func NewPager(page int, pageSize int, totalItems int, data interface{}) *Pager {
+func NewPager(page int, pageSize int, totalItems int, data any) *Pager {
 
 	return &Pager{
 		Page:       page,

@@ -6,15 +6,16 @@ import (
 	"github.com/eyebluecn/tank/code/tool/result"
 	"gorm.io/gorm"
 
-	"github.com/eyebluecn/tank/code/tool/uuid"
 	"time"
+
+	"github.com/eyebluecn/tank/code/tool/uuid"
 )
 
 type ShareDao struct {
 	BaseDao
 }
 
-//find by uuid. if not found return nil.
+// find by uuid. if not found return nil.
 func (this *ShareDao) FindByUuid(uuid string) *Share {
 	var entity = &Share{}
 	db := core.CONTEXT.GetDB().Where("uuid = ?", uuid).First(entity)
@@ -28,7 +29,7 @@ func (this *ShareDao) FindByUuid(uuid string) *Share {
 	return entity
 }
 
-//find by uuid. if not found panic NotFound error
+// find by uuid. if not found panic NotFound error
 func (this *ShareDao) CheckByUuid(uuid string) *Share {
 	entity := this.FindByUuid(uuid)
 	if entity == nil {
@@ -50,7 +51,7 @@ func (this *ShareDao) PlainPage(page int, pageSize int, userUuid string, sortArr
 	var wp = &builder.WherePair{}
 
 	if userUuid != "" {
-		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []interface{}{userUuid}})
+		wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
 	}
 
 	var conditionDB *gorm.DB
@@ -96,7 +97,7 @@ func (this *ShareDao) Delete(share *Share) {
 
 }
 
-//System cleanup.
+// System cleanup.
 func (this *ShareDao) Cleanup() {
 	this.logger.Info("[ShareDao] clean up. Delete all Share")
 	db := core.CONTEXT.GetDB().Where("uuid is not null").Delete(Share{})

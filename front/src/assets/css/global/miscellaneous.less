@@ -1,0 +1,157 @@
+@import "variables";
+
+.compulsory {
+  &:before {
+    content: "*";
+    color: red;
+  }
+}
+
+.limit-hints {
+  font-size: 10px;
+  color: #aaaaaa;
+  float: right;
+}
+
+.hover-underline {
+
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+}
+
+
+//超出三行使用点点点
+.list-text-restriction {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  line-height: 17px;
+  max-height: 51px;
+  -webkit-line-clamp: 3;
+  text-overflow: ellipsis;
+}
+
+.one-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+//讨厌的outline
+a {
+  outline: none;
+
+  &:focus, &:hover, &:active {
+    outline: none;
+  }
+}
+
+//制造一个手机容器
+.mobile-container {
+  max-width: 400px;
+  border: 1px solid #eee;
+  padding: 10px;
+  margin: 10px auto;
+  display: block;
+  background-color: white;
+}
+
+
+//按照字母来wrap，不然有些老长老长
+.wrap-word {
+  word-wrap: break-word;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.display-none {
+  display: none !important;
+}
+
+.pull-right {
+  float: right !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+//超链接导航样式
+.link {
+  color: #1890ff;
+  text-decoration: none;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: color 0.3s;
+  text-decoration-skip: objects;
+}
+
+
+//头像
+.avatar-large {
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+}
+
+.avatar-middle {
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+}
+
+.avatar-small {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+}
+
+.relative {
+  position: relative;
+}
+
+.hot-area {
+  position: relative;
+
+  &:after {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    left: -10px;
+    content: '';
+  }
+}
+
+.custom-handle-modal {
+  .ant-modal-confirm-btns {
+    display: none;
+  }
+}

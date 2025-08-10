@@ -100,7 +100,7 @@ func (this *TankContext) OpenDb() {
 		}
 
 		//sqlite lock issue. https://gist.github.com/mrnugget/0eda3b2b53a70fa4a894
-		phyDb, err := this.db.DB()
+		phyDb, _ := this.db.DB()
 		phyDb.SetMaxOpenConns(1)
 
 	} else {
@@ -134,22 +134,16 @@ func (this *TankContext) registerBean(bean core.Bean) {
 	typeOf := reflect.TypeOf(bean)
 	typeName := typeOf.String()
 
-	if element, ok := bean.(core.Bean); ok {
+	if _, ok := this.BeanMap[typeName]; ok {
+		core.LOGGER.Error("%s has been registerd, skip", typeName)
+	} else {
+		this.BeanMap[typeName] = bean
 
-		if _, ok := this.BeanMap[typeName]; ok {
-			core.LOGGER.Error("%s has been registerd, skip", typeName)
-		} else {
-			this.BeanMap[typeName] = element
-
-			//if is controller type, put into ControllerMap
-			if controller, ok1 := bean.(core.Controller); ok1 {
-				this.ControllerMap[typeName] = controller
-			}
-
+		//if is controller type, put into ControllerMap
+		if controller, ok1 := bean.(core.Controller); ok1 {
+			this.ControllerMap[typeName] = controller
 		}
 
-	} else {
-		core.LOGGER.Panic("%s is not the Bean type", typeName)
 	}
 
 }

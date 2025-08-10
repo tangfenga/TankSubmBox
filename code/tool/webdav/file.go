@@ -162,6 +162,7 @@ type memFS struct {
 //   - "/", "foo", false
 //   - "/foo/", "bar", false
 //   - "/foo/bar/", "x", true
+//
 // The frag argument will be empty only if dir is the root node and the walk
 // ends at that root node.
 func (fs *memFS) walk(op, fullname string, f func(dir *memFSNode, frag string, final bool) error) error {
@@ -469,7 +470,7 @@ func (f *memFileInfo) Size() int64        { return f.size }
 func (f *memFileInfo) Mode() os.FileMode  { return f.mode }
 func (f *memFileInfo) ModTime() time.Time { return f.modTime }
 func (f *memFileInfo) IsDir() bool        { return f.mode.IsDir() }
-func (f *memFileInfo) Sys() interface{}   { return nil }
+func (f *memFileInfo) Sys() any           { return nil }
 
 // A memFile is a File implementation for a memFSNode. It is a per-file (not
 // per-node) read/write position, and a snapshot of the memFS' tree structure

@@ -5,7 +5,6 @@ import (
 	"github.com/eyebluecn/tank/code/tool/util"
 	"github.com/json-iterator/go"
 	"gorm.io/gorm/schema"
-	"io/ioutil"
 	"os"
 	"time"
 	"unsafe"
@@ -26,7 +25,7 @@ type TankConfig struct {
 	item *ConfigItem
 }
 
-//tank.json config items.
+// tank.json config items.
 type ConfigItem struct {
 	//server port
 	ServerPort int
@@ -53,7 +52,7 @@ type ConfigItem struct {
 	SqliteFolder string
 }
 
-//validate whether the config file is ok
+// validate whether the config file is ok
 func (this *ConfigItem) validate() bool {
 
 	if this.ServerPort == 0 {
@@ -130,7 +129,7 @@ func (this *TankConfig) ReadFromConfigFile() {
 
 	//read from tank.json
 	filePath := util.GetConfPath() + "/tank.json"
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		core.LOGGER.Warn("cannot find config file %s, installation will start!", filePath)
 		this.installed = false
@@ -173,27 +172,27 @@ func (this *TankConfig) ReadFromConfigFile() {
 	}
 }
 
-//whether installed.
+// whether installed.
 func (this *TankConfig) Installed() bool {
 	return this.installed
 }
 
-//server port
+// server port
 func (this *TankConfig) ServerPort() int {
 	return this.serverPort
 }
 
-//get the db type
+// get the db type
 func (this *TankConfig) DbType() string {
 	return this.item.DbType
 }
 
-//mysql url
+// mysql url
 func (this *TankConfig) MysqlUrl() string {
 	return this.mysqlUrl
 }
 
-//get the sqlite path
+// get the sqlite path
 func (this *TankConfig) SqliteFolder() string {
 	if this.sqliteFolder == "" {
 		//use default file location.
@@ -208,12 +207,12 @@ func (this *TankConfig) SqliteFolder() string {
 	return this.sqliteFolder
 }
 
-//matter path
+// matter path
 func (this *TankConfig) MatterPath() string {
 	return this.matterPath
 }
 
-//matter path
+// matter path
 func (this *TankConfig) NamingStrategy() schema.NamingStrategy {
 	return schema.NamingStrategy{
 		TablePrefix:   core.TABLE_PREFIX,
@@ -221,7 +220,7 @@ func (this *TankConfig) NamingStrategy() schema.NamingStrategy {
 	}
 }
 
-//TODO: Finish the installation. Write config to tank.json. add sqlite support.
+// TODO: Finish the installation. Write config to tank.json. add sqlite support.
 func (this *TankConfig) FinishInstall(dbType string, mysqlPort int, mysqlHost string, mysqlSchema string, mysqlUsername string, mysqlPassword string, mysqlCharset string) {
 
 	var configItem = &ConfigItem{

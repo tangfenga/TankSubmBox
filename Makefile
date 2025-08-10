@@ -1,0 +1,40 @@
+BINARY_NAME=tank
+FRONT_DIR=front
+BUILD_DIR=$(FRONT_DIR)/build
+HTML_DIR=html
+MAIN_GO=main.go
+
+all: build
+
+build-front:
+	@echo "构建前端..."
+	cd $(FRONT_DIR) && yarn build
+	@echo "将前端构建产物复制到$(HTML_DIR)目录..."
+	rm -rf $(HTML_DIR)
+	mkdir $(HTML_DIR)
+	cp -R $(BUILD_DIR)/* $(HTML_DIR)/
+
+build-backend:
+	@echo "构建后端..."
+	go build -o $(BINARY_NAME) $(MAIN_GO)
+
+build: build-front build-backend
+
+run: build
+	@echo "运行程序..."
+	./$(BINARY_NAME)
+
+clean:
+	@echo "清理构建产物..."
+	rm -f $(BINARY_NAME)
+	rm -rf $(HTML_DIR)/*
+	cd $(FRONT_DIR) && yarn clean
+
+dev-front:
+	cd $(FRONT_DIR) && yarn start
+
+dev-back:
+	ENV=development go run $(MAIN_GO)
+
+.PHONY: all build-front build-backend build run clean dev-front dev-back
+    
