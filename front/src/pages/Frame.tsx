@@ -30,8 +30,6 @@ import MatterDetail from './matter/Detail';
 
 import BinList from './bin/List';
 
-import ShareList from './share/List';
-import ShareDetail from './share/Detail';
 import User from '../common/model/user/User';
 import Moon from '../common/model/global/Moon';
 import Sun from '../common/model/global/Sun';
@@ -172,9 +170,6 @@ class RawFrame extends TankComponent<IProps, IState> {
                   render={() => <Redirect to="/matter/list" />}
                 />
                 <Route path="/matter/list" component={MatterList} />
-
-                <Route path="/share/list" component={ShareList} />
-                <Route path="/share/detail/:uuid" component={ShareDetail} />
 
                 <Route path="/bin/list" component={BinList} />
                 <Route path="/space" exact component={SpaceList} />

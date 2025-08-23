@@ -40,7 +40,5 @@ func EnvMacDevelopment() bool {
 
 // whether develop environment (whether run in IDE)
 func EnvDevelopment() bool {
-
-	return EnvWinDevelopment() || EnvMacDevelopment()
-
+	return os.Getenv("TANK") == "DEVELOPMENT"
 }

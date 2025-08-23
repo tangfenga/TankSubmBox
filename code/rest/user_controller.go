@@ -1,15 +1,17 @@
 package rest
 
 import (
+	"encoding/json"
+	"net/http"
+	"regexp"
+	"strconv"
+	"time"
+
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/builder"
 	"github.com/eyebluecn/tank/code/tool/i18n"
 	"github.com/eyebluecn/tank/code/tool/result"
 	"github.com/eyebluecn/tank/code/tool/util"
-	"net/http"
-	"regexp"
-	"strconv"
-	"time"
 )
 
 type UserController struct {
@@ -69,6 +71,12 @@ func (this *UserController) RegisterRoutes() map[string]func(writer http.Respons
 	routeMap["/api/user/transfiguration"] = this.Wrap(this.Transfiguration, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/scan"] = this.Wrap(this.Scan, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/delete"] = this.Wrap(this.Delete, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/label/delete"] = this.Wrap(this.DeleteLabel, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/label/create"] = this.Wrap(this.CreateLabel, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/label"] = this.Wrap(this.Labels, USER_ROLE_USER)
+	routeMap["/api/user/group/delete"] = this.Wrap(this.DeleteUserGroup, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/group/create"] = this.Wrap(this.CreateUserGroup, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/group"] = this.Wrap(this.UserGroups, USER_ROLE_ADMINISTRATOR)
 
 	return routeMap
 }
@@ -195,6 +203,55 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 	this.innerLogin(writer, request, user)
 
 	return this.Success(user)
+}
+
+func (this *UserController) CreateLabel(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	labelname := request.FormValue("name")
+	labeltype := request.FormValue("type")
+	this.userService.CreateLabel(labelname, labeltype)
+	return this.Success("")
+}
+
+func (this *UserController) DeleteLabel(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	labelname := request.FormValue("name")
+	this.userDao.DeleteLabel(labelname)
+	return this.Success("")
+}
+
+
+func (this *UserController) Labels(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	res := this.userDao.AllLabels()
+	// panic(fmt.Sprintf("%v %v", res[0].Name, res[0].Type))
+	return this.Success(res)
+}
+
+func (this *UserController) CreateUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	jsonData := request.FormValue("data")
+	var data Group
+	err := json.Unmarshal([]byte(jsonData), &data)
+	if err != nil {
+		panic(result.BadRequest("%v", err))
+	}
+	this.userService.CreateUserGroup(data)
+	return this.Success("")
+}
+
+func (this *UserController) DeleteUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	jsonData := request.FormValue("data")
+	var data Group
+	err := json.Unmarshal([]byte(jsonData), &data)
+	if err != nil {
+		panic(result.BadRequest("%v", err))
+	}
+	this.userDao.DeleteUserGroup(data.Name)
+	return this.Success("")
+}
+
+
+func (this *UserController) UserGroups(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	res := this.userDao.AllUserGroups()
+	// panic(fmt.Sprintf("%v %v", res[0].Name, res[0].Type))
+	return this.Success(res)
 }
 
 func (this *UserController) Create(writer http.ResponseWriter, request *http.Request) *result.WebResult {

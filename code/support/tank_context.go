@@ -218,11 +218,6 @@ func (this *TankContext) registerBeans() {
 	this.registerBean(new(rest.UserController))
 	this.registerBean(new(rest.UserDao))
 	this.registerBean(new(rest.UserService))
-
-	//webdav
-	this.registerBean(new(rest.DavController))
-	this.registerBean(new(rest.DavService))
-
 }
 
 func (this *TankContext) GetBean(bean core.Bean) core.Bean {

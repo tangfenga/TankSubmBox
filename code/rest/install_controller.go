@@ -83,6 +83,9 @@ func (this *InstallController) Init() {
 		&SpaceMember{},
 		&UploadToken{},
 		&User{},
+		&Label{},
+		&Labeled{},
+		&Group{},
 	}
 
 }

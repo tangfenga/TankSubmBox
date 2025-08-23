@@ -74,8 +74,8 @@ func GetHomePath() string {
 func GetHtmlPath() string {
 
 	//开发环境直接使用 build/html 下面的文件
-	if EnvWinDevelopment() || EnvMacDevelopment() {
-		return GetDevHomePath() + "/build/html"
+	if EnvDevelopment() {
+		return GetHomePath() + "/front/build"
 	}
 	return GetHomePath() + "/html"
 }

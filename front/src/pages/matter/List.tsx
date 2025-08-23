@@ -45,7 +45,6 @@ import MoveBatchModal from './widget/MoveBatchModal';
 import ShareOperationModal from './widget/ShareOperationModal';
 import MatterDeleteModal from './widget/MatterDeleteModal';
 import Share from '../../common/model/share/Share';
-import ShareDialogModal from '../share/widget/ShareDialogModal';
 import BreadcrumbModel from '../../common/model/base/option/BreadcrumbModel';
 import BreadcrumbPanel from '../widget/BreadcrumbPanel';
 import Lang from '../../common/model/global/Lang';
@@ -500,9 +499,9 @@ export default class List extends TankComponent<IProps, IState> {
     const uuids = this.selectedMatters.map((i) => i.uuid).join(',');
     ShareOperationModal.open((share: Share) => {
       share.spaceUuid = this.getSpaceUuid();
-      share.httpCreate(uuids, () => {
-        ShareDialogModal.open(share);
-      });
+      // share.httpCreate(uuids, () => {
+      //   ShareDialogModal.open(share);
+      // });
     });
   }
 
@@ -776,18 +775,6 @@ export default class List extends TankComponent<IProps, IState> {
                       </Button>
                     </>
                   )}
-
-                  {/*共享空间下暂不支持分享功能*/}
-                  {!this.isInSpace && !this.isSearch() && (
-                    <Button
-                      type="primary"
-                      className="mb10"
-                      onClick={() => this.shareBatch()}
-                    >
-                      <ShareAltOutlined />
-                      {Lang.t('matter.share')}
-                    </Button>
-                  )}
                 </>
               ) : null}
 
@@ -805,6 +792,13 @@ export default class List extends TankComponent<IProps, IState> {
                     </Button>
                   </Upload>
                   <Button
+                    type="primary" className="mb10"
+                    onClick={() => this.uploadDirectoryBtnRef.current?.click()}
+                  >
+                    <CloudUploadOutlined />
+                    {Lang.t('matter.uploadDir')}
+                  </Button>
+                  <Button
                     type="primary"
                     className="mb10"
                     onClick={() => this.createDirectory()}
@@ -812,15 +806,6 @@ export default class List extends TankComponent<IProps, IState> {
                     <FolderOutlined />
                     {Lang.t('matter.create')}
                   </Button>
-                  <Dropdown
-                    trigger={['hover']}
-                    overlay={this.getDropdownMenu()}
-                  >
-                    <Button type="primary" className="mb10">
-                      <MenuOutlined />
-                      {Lang.t('more')}
-                    </Button>
-                  </Dropdown>
                 </>
               )}
 

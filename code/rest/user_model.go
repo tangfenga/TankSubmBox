@@ -32,6 +32,7 @@ type User struct {
 	UpdateTime time.Time `json:"updateTime" gorm:"type:timestamp not null;default:CURRENT_TIMESTAMP"`
 	CreateTime time.Time `json:"createTime" gorm:"type:timestamp not null;default:'2018-01-01 00:00:00'"`
 	Role       string    `json:"role" gorm:"type:varchar(45)"`
+	Group      string 	 `json:"name" gorm:"type:varchar(45);not null;default:''"`
 	Username   string    `json:"username" gorm:"type:varchar(45) not null;unique"`
 	Password   string    `json:"-" gorm:"type:varchar(255)"`
 	AvatarUrl  string    `json:"avatarUrl" gorm:"type:varchar(255)"`

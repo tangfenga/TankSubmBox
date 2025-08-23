@@ -75,7 +75,6 @@ let LangZh = {
   },
   layout: {
     allFiles: '个人文件',
-    myShare: '我的分享',
     bin: '回收站',
     setting: '网站设置',
     dashboard: '监控统计',
@@ -84,7 +83,6 @@ let LangZh = {
     about: '关于',
     install: '安装网站',
     dragMouseUp: '可以松手啦~',
-    space: '共享空间',
   },
   matter: {
     file: '文件',
@@ -102,7 +100,7 @@ let LangZh = {
     preview: '预览',
     move: '移动',
     moveTo: '移动到',
-    upload: '上传',
+    upload: '上传文件',
     create: '新建',
     createTime: '创建时间',
     updateTime: '修改时间',

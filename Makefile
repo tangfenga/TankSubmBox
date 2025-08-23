@@ -30,11 +30,15 @@ clean:
 	rm -rf $(HTML_DIR)/*
 	cd $(FRONT_DIR) && yarn clean
 
+dev: build-backend
+	@echo "同时启动前端和后端开发服务器..."
+	trap 'kill $(jobs -p)' EXIT; \
+	(cd $(FRONT_DIR) && yarn start) & \
+	(TANK=DEVELOPMENT ./$(BINARY_NAME)) & \
+	wait
+
 dev-front:
 	cd $(FRONT_DIR) && yarn start
 
-dev-back:
-	ENV=development go run $(MAIN_GO)
-
-.PHONY: all build-front build-backend build run clean dev-front dev-back
+.PHONY: all build-front build-backend build run clean dev-front dev-back dev
     

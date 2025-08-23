@@ -86,16 +86,6 @@ export default class MenuManager {
         )
       );
       menuItems.push(
-        new MenuItem(Lang.t('layout.space'), '/space', <CloudSyncOutlined />)
-      );
-      menuItems.push(
-        new MenuItem(
-          Lang.t('layout.myShare'),
-          '/share/list',
-          <ShareAltOutlined />
-        )
-      );
-      menuItems.push(
         new MenuItem(Lang.t('layout.bin'), '/bin/list', <DeleteOutlined />)
       );
 

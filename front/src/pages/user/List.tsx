@@ -31,6 +31,8 @@ import Color from '../../common/model/base/option/Color';
 import TransfigurationModal from './widget/TransfigurationModal';
 import Lang from '../../common/model/global/Lang';
 import Moon from '../../common/model/global/Moon';
+import LabelManager from '../widget/LabelManager';
+import UserGroupManager from '../widget/UserGroupManager';
 
 interface IProps extends RouteComponentProps {}
 
@@ -263,10 +265,12 @@ export default class List extends TankComponent<IProps, IState> {
       <div className="page-user-list">
         <TankTitle name={Lang.t('layout.users')}>
           <Link to={'/user/create'}>
-            <Button type={'primary'} icon={<PlusOutlined />}>
+            <Button type={'primary'} icon={<PlusOutlined />} 
+                className="mb10">
               {Lang.t('user.createUser')}
             </Button>
           </Link>
+          <LabelManager ></LabelManager>
         </TankTitle>
 
         <div>
@@ -288,6 +292,8 @@ export default class List extends TankComponent<IProps, IState> {
             ),
           }}
         />
+        
+          <UserGroupManager></UserGroupManager>
       </div>
     );
   }

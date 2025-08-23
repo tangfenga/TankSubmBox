@@ -67,8 +67,71 @@ func (this *UserDao) CheckByUuid(uuid string) *User {
 	return entity
 }
 
-func (this *UserDao) FindByUsername(username string) *User {
+func (this *UserDao) AppendLabel(label Label) {
+	db := core.CONTEXT.GetDB().Create(&label)
+	if db.Error != nil {
+		panic(db.Error)
+	}
+}
 
+func (this *UserDao) FindLabel(name string) *Label {
+	var res = &Label{}
+	db := core.CONTEXT.GetDB().Where(&Label{Name: name}).First(res)
+	if db.Error != nil {
+		if db.Error.Error() == result.DB_ERROR_NOT_FOUND {
+			return nil
+		}
+		panic(db.Error)
+	}
+	return res
+}
+
+func (this *UserDao) AllLabels() []Label {
+	var res []Label
+	db := core.CONTEXT.GetDB().Find(&res)
+	if db.Error != nil {
+		panic(db.Error)
+	}
+	return res
+}
+
+func (this *UserDao) DeleteLabel(name string) {
+	core.CONTEXT.GetDB().Where(&Label{Name: name}).Delete(&Label{})
+}
+
+func (this *UserDao) AppendGroup(g Group) {
+	db := core.CONTEXT.GetDB().Create(&g)
+	if db.Error != nil {
+		panic(db.Error)
+	}
+}
+
+func (this *UserDao) FindGroupByName(name string) *Label {
+	var res = &Label{}
+	db := core.CONTEXT.GetDB().Where(&Group{Name: name}).First(res)
+	if db.Error != nil {
+		if db.Error.Error() == result.DB_ERROR_NOT_FOUND {
+			return nil
+		}
+		panic(db.Error)
+	}
+	return res
+}
+
+func (this *UserDao) AllUserGroups() []Group {
+	var res []Group
+	db := core.CONTEXT.GetDB().Find(&res)
+	if db.Error != nil {
+		panic(db.Error)
+	}
+	return res
+}
+
+func (this *UserDao) DeleteUserGroup(name string) {
+	core.CONTEXT.GetDB().Where(&Group{Name: name}).Delete(&Group{})
+}
+
+func (this *UserDao) FindByUsername(username string) *User {
 	var user = &User{}
 	db := core.CONTEXT.GetDB().Where(&User{Username: username}).First(user)
 	if db.Error != nil {
