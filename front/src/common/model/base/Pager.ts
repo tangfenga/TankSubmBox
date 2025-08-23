@@ -296,6 +296,7 @@ export default class Pager<T> extends HttpBase {
         // handle success
 
         that.assign(response.data.data);
+        console.log(response.data.data)
 
         SafeUtil.safeCallback(successCallback)(response);
       },

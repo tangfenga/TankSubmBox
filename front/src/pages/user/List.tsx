@@ -202,6 +202,16 @@ export default class List extends TankComponent<IProps, IState> {
           DateUtil.simpleDateTime(text),
       },
       {
+        title: "用户组",
+        dataIndex: 'userGroup',
+        render: (text: any, record: User, index: number): React.ReactNode =>
+        (
+          <div>
+            {record.userGroup}
+          </div>
+        )
+      },
+      {
         title: Lang.t('operation'),
         dataIndex: 'action',
         render: (text: any, record: User) => (

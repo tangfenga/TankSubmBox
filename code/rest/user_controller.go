@@ -179,6 +179,7 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 
 	username := request.FormValue("username")
 	password := request.FormValue("password")
+	userGroup := request.FormValue("userGroup")
 
 	preference := this.preferenceService.Fetch()
 	if !preference.AllowRegister {
@@ -197,7 +198,7 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 		panic(result.BadRequestI18n(request, i18n.UsernameExist, username))
 	}
 
-	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER)
+	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER, userGroup)
 
 	//auto login
 	this.innerLogin(writer, request, user)
@@ -217,7 +218,6 @@ func (this *UserController) DeleteLabel(writer http.ResponseWriter, request *htt
 	this.userDao.DeleteLabel(labelname)
 	return this.Success("")
 }
-
 
 func (this *UserController) Labels(writer http.ResponseWriter, request *http.Request) *result.WebResult {
 	res := this.userDao.AllLabels()
@@ -247,7 +247,6 @@ func (this *UserController) DeleteUserGroup(writer http.ResponseWriter, request 
 	return this.Success("")
 }
 
-
 func (this *UserController) UserGroups(writer http.ResponseWriter, request *http.Request) *result.WebResult {
 	res := this.userDao.AllUserGroups()
 	// panic(fmt.Sprintf("%v %v", res[0].Name, res[0].Type))
@@ -259,6 +258,7 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 	username := request.FormValue("username")
 	password := request.FormValue("password")
 	role := request.FormValue("role")
+	group := request.FormValue("userGroup")
 
 	sizeLimit := util.ExtractRequestInt64(request, "sizeLimit")
 	totalSizeLimit := util.ExtractRequestInt64(request, "totalSizeLimit")
@@ -284,7 +284,7 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 		panic(result.BadRequestI18n(request, i18n.UserRoleError))
 	}
 
-	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role)
+	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role, group)
 
 	return this.Success(user)
 }

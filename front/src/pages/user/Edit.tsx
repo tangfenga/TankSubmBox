@@ -10,13 +10,18 @@ import FileUtil from '../../common/util/FileUtil';
 import TankContentCard from '../widget/TankContentCard';
 import { FormInstance } from 'antd/lib/form';
 import { SaveOutlined } from '@ant-design/icons/lib';
-import { UserRole, UserRoleList } from '../../common/model/user/UserRole';
+import {
+  UserGroup,
+  UserRole,
+  UserRoleList,
+} from '../../common/model/user/UserRole';
 import ColorSelectionOption from '../../common/model/base/option/ColorSelectionOption';
 import MessageBoxUtil from '../../common/util/MessageBoxUtil';
 import Sun from '../../common/model/global/Sun';
 import Lang from '../../common/model/global/Lang';
 import MatterImage from '../matter/widget/MatterImage';
 import InputSize from '../widget/form/InputSize';
+import HttpUtil from '../../common/util/HttpUtil';
 
 interface RouteParam {
   uuid: string;
@@ -37,6 +42,8 @@ export default class Edit extends TankComponent<IProps, IState> {
   //当前页面正在编辑的用户
   currentUser: User = new User(this);
 
+  userGroupList: string[] = [];
+
   constructor(props: IProps) {
     super(props);
 
@@ -46,6 +53,15 @@ export default class Edit extends TankComponent<IProps, IState> {
 
   componentDidMount() {
     let match = this.props.match;
+
+    HttpUtil.httpGet(
+      '/api/user/group',
+      {},
+      (res: { data: { data: UserGroup[] } }) => {
+        this.userGroupList = res.data.data.map((g) => g.name);
+        this.updateUI();
+      }
+    );
 
     if (match.params.uuid) {
       this.createMode = false;
@@ -62,6 +78,8 @@ export default class Edit extends TankComponent<IProps, IState> {
 
     let user: User = this.user;
     let currentUser: User = this.currentUser;
+
+    console.log(values);
 
     currentUser.assign(values);
 
@@ -186,6 +204,25 @@ export default class Edit extends TankComponent<IProps, IState> {
                 <Input.Password />
               </Form.Item>
             )}
+
+            {this.createMode && (
+              <Form.Item
+                name="userGroup"
+                label="用户组"
+                rules={[{required: true, message: "必须选择用户组" }]}
+              >
+                <Select disabled={!roleEditable}>
+                  {this.userGroupList.map(g => {
+                    return (
+                      <Select.Option key={g} value={g} >
+                        {g}
+                      </Select.Option>
+                    )
+                  })}
+                </Select>
+              </Form.Item>
+            )}
+
             <Form.Item
               label={Lang.t('user.role')}
               name="role"

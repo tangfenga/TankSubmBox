@@ -8,6 +8,15 @@ enum UserRole {
   ADMINISTRATOR = 'ADMINISTRATOR',
 }
 
+interface UserGroup {
+  id: number;
+  name: string;
+  display: string;
+  editable_labels: string;
+  editable: boolean;
+}
+
+
 let UserRoles: UserRole[] = Object.keys(UserRole).map((k) => k as UserRole);
 
 let UserRoleMap: { [key in keyof typeof UserRole]: ColorSelectionOption } = {
@@ -33,4 +42,5 @@ UserRoles.forEach((type: UserRole, index: number) => {
   UserRoleList.push(UserRoleMap[type]);
 });
 
-export { UserRole, UserRoles, UserRoleMap, UserRoleList };
+export { UserRole, UserRoles, UserRoleMap, UserRoleList };  export type { UserGroup };
+

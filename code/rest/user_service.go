@@ -253,13 +253,14 @@ func (this *UserService) RemoveCacheUserByUuid(userUuid string) {
 }
 
 // create user
-func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string) *User {
+func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string, userGroup string) *User {
 
 	user := &User{
 		Username: username,
 		Password: util.GetBcrypt(password),
 		Role:     role,
 		Status:   USER_STATUS_OK,
+		Group: userGroup,
 	}
 
 	user = this.userDao.Create(user)
