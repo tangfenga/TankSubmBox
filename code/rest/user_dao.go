@@ -107,6 +107,9 @@ func (this *UserDao) AppendGroup(g Group) {
 }
 
 func (this *UserDao) FindGroupByName(name string) *Group {
+	if len(name) == 0 {
+		return nil
+	}
 	var res = &Group{}
 	db := core.CONTEXT.GetDB().Where(&Group{Name: name}).First(res)
 	if db.Error != nil {

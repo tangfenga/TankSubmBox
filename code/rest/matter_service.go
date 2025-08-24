@@ -97,6 +97,7 @@ func (this *MatterService) Page(
 	deleted string,
 	extensions []string,
 	spaceUuid string,
+	requiredLabels []string,
 ) *Pager {
 
 	sortArray := []builder.OrderPair{
@@ -134,10 +135,24 @@ func (this *MatterService) Page(
 		},
 	}
 
-	pager := this.matterDao.Page(page, pageSize, puuid, "", spaceUuid, name, dir, deleted, extensions, sortArray)
+	pager := this.matterDao.Page(page, pageSize, puuid, "", spaceUuid, name, dir, deleted, extensions, sortArray, requiredLabels)
 
 	return pager
 }
+
+func (this *MatterService) RequiredLabels(uuid string) []string {
+	group := this.userDao.FindByUuid(uuid).Group
+	groupInfo := this.userDao.FindGroupByName(group)
+
+	if groupInfo == nil {
+		return make([]string, 0)
+	}
+
+	var allowLabel []string
+	json.Unmarshal([]byte(groupInfo.Display), &allowLabel)
+	return allowLabel
+}
+
 
 // search files by dfs.
 func (this *MatterService) DfsSearch(
@@ -147,6 +162,7 @@ func (this *MatterService) DfsSearch(
 	keyword string,
 	spaceUuid string,
 	deleted bool,
+	requiredLabels []string,
 ) []*Matter {
 
 	deletedStr := FALSE
@@ -155,7 +171,7 @@ func (this *MatterService) DfsSearch(
 	}
 
 	//find all matters including dir and files.
-	_, matters := this.matterDao.PlainPage(0, limit, puuid, "", spaceUuid, keyword, "", deletedStr, nil, nil, nil)
+	_, matters := this.matterDao.PlainPage(0, limit, puuid, "", spaceUuid, keyword, "", deletedStr, nil, nil, nil, requiredLabels)
 	if len(matters) >= limit {
 		return matters
 	}
@@ -168,7 +184,7 @@ func (this *MatterService) DfsSearch(
 	}
 
 	//dfs from puuid.
-	_, dirMatters := this.matterDao.PlainPage(0, 1000, puuid, "", spaceUuid, "", TRUE, "", nil, nil, nil)
+	_, dirMatters := this.matterDao.PlainPage(0, 1000, puuid, "", spaceUuid, "", TRUE, "", nil, nil, nil, requiredLabels)
 	for _, dirMatter := range dirMatters {
 
 		//add dir if match.
@@ -179,7 +195,7 @@ func (this *MatterService) DfsSearch(
 		}
 
 		remainLimit := limit - len(resultList)
-		subMatters := this.DfsSearch(request, remainLimit, dirMatter.Uuid, keyword, spaceUuid, deleted)
+		subMatters := this.DfsSearch(request, remainLimit, dirMatter.Uuid, keyword, spaceUuid, deleted, requiredLabels)
 		for _, subMatter := range subMatters {
 			resultList = append(resultList, subMatter)
 		}
@@ -205,6 +221,7 @@ func (this *MatterService) DownloadFile(
 
 	download.DownloadFile(writer, request, filePath, filename, withContentDisposition)
 }
+
 
 func (this *MatterService) AddLabel(labelname, target, userUuid string, value int) {
 	group := this.userDao.FindByUuid(userUuid).Group
@@ -1383,7 +1400,7 @@ func (this *MatterService) deleteFolderByPhysics(request *http.Request, dirMatte
 			this.AtomicDelete(nil, matter, user, space)
 		}
 
-	})
+	}, nil)
 }
 
 // scan someone's physics files to EyeblueTank
@@ -1415,7 +1432,7 @@ func (this *MatterService) scanPhysicsFolder(request *http.Request, dirInfo os.F
 	}
 
 	//fetch all matters under this folder.
-	_, matters := this.matterDao.PlainPage(0, 1000, dirMatter.Uuid, "", space.Uuid, "", "", "", nil, nil, nil)
+	_, matters := this.matterDao.PlainPage(0, 1000, dirMatter.Uuid, "", space.Uuid, "", "", "", nil, nil, nil, nil)
 	nameMatterMap := make(map[string]*Matter)
 	for _, m := range matters {
 		nameMatterMap[m.Name] = m
@@ -1496,7 +1513,7 @@ func (this *MatterService) CleanExpiredDeletedMatters() {
 		//first remove all the matter(not dir).
 		this.matterDao.PageHandle("", "", "", "", FALSE, TRUE, &thenDate, nil, func(matter *Matter) {
 			this.Delete(request, matter, user, space)
-		})
+		}, nil)
 
 		sortArray := []builder.OrderPair{
 			{
@@ -1508,7 +1525,7 @@ func (this *MatterService) CleanExpiredDeletedMatters() {
 		//remove all the deleted directories. sort by path.
 		this.matterDao.PageHandle("", "", "", "", TRUE, TRUE, &thenDate, sortArray, func(matter *Matter) {
 			this.Delete(request, matter, user, space)
-		})
+		}, nil)
 
 	})
 

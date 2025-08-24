@@ -27,6 +27,7 @@ import MatterDeleteModal from './MatterDeleteModal';
 import { SpaceMemberRole } from '../../../common/model/space/member/SpaceMemberRole';
 import { Label } from '../../../common/model/user/UserRole';
 import MatterLabelsManager from './MatterLabelsManager';
+import HttpUtil from '../../../common/util/HttpUtil';
 
 interface IProps {
   matter: Matter;
@@ -34,6 +35,7 @@ interface IProps {
   spaceMemberRole?: SpaceMemberRole; // 用户在当前空间下的角色,只有在space模式下才有值
   director?: Director;
   allLabels: Label[];
+  userUuid: string,
   onCreateDirectoryCallback?: () => any;
   onDeleteSuccess?: () => any;
   onCheckMatter?: (matter?: Matter) => any;
@@ -291,7 +293,7 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
             <MatterLabelsManager
               allLabels={this.props.allLabels}
               uuid={this.props.matter.uuid ?? ''}
-              userUuid={this.props.matter.userUuid}
+              userUuid={this.props.userUuid}
             ></MatterLabelsManager>
           )}
           <Tooltip title={Lang.t('matter.download')}>

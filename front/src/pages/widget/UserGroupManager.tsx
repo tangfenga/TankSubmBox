@@ -101,7 +101,7 @@ const UserGroupManager: React.FC = () => {
       name: values.name,
       display: JSON.stringify(values.display),
       editable_labels: JSON.stringify(values.editable_labels),
-      editable: values.editable,
+      editable: !values.display || values.display.length == 0,
     };
 
     const newGroupJSON = JSON.stringify(newUserGroup);
@@ -310,10 +310,6 @@ const UserGroupManager: React.FC = () => {
                 ))}
               </Space>
             </Checkbox.Group>
-          </Form.Item>
-
-          <Form.Item name="editable" valuePropName="checked">
-            <Checkbox>允许编辑内容</Checkbox>
           </Form.Item>
 
           <Form.Item>

@@ -38,17 +38,17 @@ export default class BottomLayout extends TankComponent<IProps, IState> {
           <span dangerouslySetInnerHTML={{ __html: preference.record }} />
         </span>
         <span className="item">
-          <a className="text-theme" onClick={BottomLayout.changeLang}>
+          {/* <a className="text-theme" onClick={BottomLayout.changeLang}>
             {Lang.getSingleton().lang === 'zh' ? 'English' : '中文'}
-          </a>
+          </a> */}
         </span>
         {/*开源不易，请不要移除掉这里的代码，蓝眼云盘谢谢您! ^_^*/}
         {/*It is not easy to open source，please do not remove the following code, thank you! ^_^ */}
         <span className="brand">
-          Powered by{' '}
+          {/* Powered by{' '} */}
           <a target="_blank" href="https://github.com/eyebluecn/tank">
-            <img alt="logo" className="w30" src={DefaultLogoPng} />{' '}
-            {Lang.t('eyeblueTank')}
+            {/* <img alt="logo" className="w30" src={DefaultLogoPng} />{' '} */}
+            {"关于"}
           </a>
         </span>
       </div>

@@ -9,7 +9,7 @@ import {
   Space,
   message,
 } from 'antd';
-import { LinkOutlined, CloseOutlined } from '@ant-design/icons';
+import { LinkOutlined, CloseOutlined, TagOutlined } from '@ant-design/icons';
 import { Label } from '../../../common/model/user/UserRole';
 import SafeUtil from '../../../common/util/SafeUtil';
 import HttpUtil from '../../../common/util/HttpUtil';
@@ -51,7 +51,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
     );
   }, []);
 
-  const selectedLabel = selectedLabelId
+  const selectedLabel = selectedLabelId != null
     ? allLabels.find((label) => label.id === selectedLabelId)
     : null;
 
@@ -66,7 +66,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
   };
 
   const handleAddLabel = (): void => {
-    if (!selectedLabelId || !selectedLabel) {
+    if (selectedLabelId == null || !selectedLabel) {
       message.warning('请先选择一个标签');
       return;
     }
@@ -82,13 +82,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
     };
 
     const exists = existingLabels.some((label) => {
-      if (label.id !== newLabel.id) return false;
-
-      if (label.type === 'numb' && newLabel.type === 'numb') {
-        return label.value === newLabel.value;
-      }
-
-      return true;
+      return label.name == newLabel.name;
     });
 
     if (exists) {
@@ -149,7 +143,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
   return (
     <>
       <Tooltip title="管理标签">
-        <LinkOutlined
+        <TagOutlined
           className="btn-action"
           onClick={(e) => SafeUtil.stopPropagationWrap(e)(showModal())}
           style={{ fontSize: '16px', color: '#1890ff', cursor: 'pointer' }}
@@ -172,7 +166,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
               key="add"
               type="primary"
               onClick={wrapStopPropagation(handleAddLabel)}
-              disabled={!selectedLabelId}
+              disabled={selectedLabelId == null}
             >
               添加
             </Button>,

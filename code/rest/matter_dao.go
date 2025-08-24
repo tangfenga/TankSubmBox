@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"time"
@@ -390,8 +391,7 @@ func (this *MatterDao) FindByUuids(uuids []string, sortArray []builder.OrderPair
 	return matters
 }
 
-// pagination is 0 base.
-func (this *MatterDao) PlainPage(
+func (this *MatterDao) NormalPlainPage(
 	page int,
 	pageSize int,
 	puuid string,
@@ -461,9 +461,110 @@ func (this *MatterDao) PlainPage(
 
 	return int(count), matters
 }
-func (this *MatterDao) Page(page int, pageSize int, puuid string, userUuid string, spaceUuid string, name string, dir string, deleted string, extensions []string, sortArray []builder.OrderPair) *Pager {
 
-	count, matters := this.PlainPage(page, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, nil, extensions, sortArray)
+// pagination is 0 base.
+// pagination is 0 base.
+func (this *MatterDao) PlainPage(
+    page int,
+    pageSize int,
+    puuid string,
+    userUuid string,
+    spaceUuid string,
+    name string,
+    dir string,
+    deleted string,
+    deleteTimeBefore *time.Time,
+    extensions []string,
+    sortArray []builder.OrderPair,
+    requiredLabels []string) (int, []*Matter) {
+    if len(requiredLabels) == 0 {
+        return this.NormalPlainPage(page, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, deleteTimeBefore, extensions, sortArray)
+    }
+
+    var selectedUuid []string
+    nameCount := len(requiredLabels)
+
+	fmt.Printf("required %v", requiredLabels)
+
+    err := core.CONTEXT.GetDB().Model(&Labeled{}).
+        Where("name IN (?)", requiredLabels).
+        Group("target").
+        Having("COUNT(DISTINCT name) = ?", nameCount).
+        Pluck("target", &selectedUuid).
+        Error
+
+		
+	fmt.Printf("selected %v", selectedUuid)
+
+    if err != nil {
+        panic(err)
+    }
+
+    if len(selectedUuid) == 0 {
+        return 0, []*Matter{}
+    }
+
+    var wp = &builder.WherePair{}
+
+    if puuid != "" {
+        wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
+    }
+
+    if userUuid != "" {
+        wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
+    }
+
+
+    if name != "" {
+        wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%" + name + "%"}})
+    }
+
+    if deleteTimeBefore != nil {
+        wp = wp.And(&builder.WherePair{Query: "delete_time < ?", Args: []any{deleteTimeBefore}})
+    }
+
+    if dir == TRUE {
+        wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{1}})
+    } else if dir == FALSE {
+        wp = wp.And(&builder.WherePair{Query: "dir = ?", Args: []any{0}})
+    }
+
+    if deleted == TRUE {
+        wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []any{1}})
+    } else if deleted == FALSE {
+        wp = wp.And(&builder.WherePair{Query: "deleted = ?", Args: []any{0}})
+    }
+
+    wp = wp.And(&builder.WherePair{Query: "uuid IN (?)", Args: []any{selectedUuid}})
+
+    var conditionDB *gorm.DB
+    if extensions != nil && len(extensions) > 0 {
+        var orWp = &builder.WherePair{}
+
+        for _, v := range extensions {
+            orWp = orWp.Or(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%." + v}})
+        }
+
+        conditionDB = core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...).Where(orWp.Query, orWp.Args...)
+    } else {
+        conditionDB = core.CONTEXT.GetDB().Model(&Matter{}).Where(wp.Query, wp.Args...)
+    }
+
+    var count int64 = 0
+    db := conditionDB.Count(&count)
+    this.PanicError(db.Error)
+
+    var matters []*Matter
+    db = conditionDB.Order(this.GetSortString(sortArray)).Offset(page * pageSize).Limit(pageSize).Find(&matters)
+    this.PanicError(db.Error)
+	fmt.Printf("matters %v", matters)
+
+    return int(count), matters
+}
+
+func (this *MatterDao) Page(page int, pageSize int, puuid string, userUuid string, spaceUuid string, name string, dir string, deleted string, extensions []string, sortArray []builder.OrderPair, requiredLabels []string) *Pager {
+
+	count, matters := this.PlainPage(page, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, nil, extensions, sortArray, requiredLabels)
 	pager := NewPager(page, pageSize, count, matters)
 
 	return pager
@@ -479,7 +580,8 @@ func (this *MatterDao) PageHandle(
 	deleted string,
 	deleteTimeBefore *time.Time,
 	sortArray []builder.OrderPair,
-	fun func(matter *Matter)) {
+	fun func(matter *Matter),
+	requiredLabels []string) {
 
 	pageSize := 1000
 	if sortArray == nil || len(sortArray) == 0 {
@@ -491,13 +593,13 @@ func (this *MatterDao) PageHandle(
 		}
 	}
 
-	count, _ := this.PlainPage(0, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, deleteTimeBefore, nil, sortArray)
+	count, _ := this.PlainPage(0, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, deleteTimeBefore, nil, sortArray, requiredLabels)
 	if count > 0 {
 		var totalPages = int(math.Ceil(float64(count) / float64(pageSize)))
 
 		var page int
 		for page = 0; page < totalPages; page++ {
-			_, matters := this.PlainPage(0, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, deleteTimeBefore, nil, sortArray)
+			_, matters := this.PlainPage(0, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, deleteTimeBefore, nil, sortArray, requiredLabels)
 			for _, matter := range matters {
 				fun(matter)
 			}

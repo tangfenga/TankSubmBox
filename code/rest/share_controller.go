@@ -428,6 +428,7 @@ func (this *ShareController) MatterPage(writer http.ResponseWriter, request *htt
 		deleted,
 		extensions,
 		share.SpaceUuid,
+		nil,
 	)
 
 	return this.Success(pager)

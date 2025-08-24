@@ -893,6 +893,7 @@ export default class List extends TankComponent<IProps, IState> {
             ref={this.newMatterRef}
             matter={this.newMatter}
             allLabels={this.labelList}
+            userUuid={this.user.uuid ?? ""}
             director={director}
             onCreateDirectoryCallback={() => this.refresh()}
           />
@@ -912,6 +913,7 @@ export default class List extends TankComponent<IProps, IState> {
                   }
                   key={matter.uuid}
                   director={director}
+                  userUuid={this.user.uuid ?? ""}
                   matter={matter}
                   allLabels={this.labelList}
                   onGoToDirectory={(id) => this.goToDirectory(id)}

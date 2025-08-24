@@ -114,7 +114,7 @@ func (this *MatterController) Detail(writer http.ResponseWriter, request *http.R
 
 	matter := this.matterService.Detail(request, uuid)
 
-	if matter.SpaceUuid != space.Uuid {
+	if len(this.matterService.RequiredLabels(user.Uuid)) == 0 && matter.SpaceUuid != space.Uuid {
 		panic(result.UNAUTHORIZED)
 	}
 
@@ -151,6 +151,8 @@ func (this *MatterController) Page(writer http.ResponseWriter, request *http.Req
 	user := this.checkUser(request)
 	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
 	this.spaceService.CheckReadableByUuid(request, user, spaceUuid)
+	
+	requiredLabels := this.matterService.RequiredLabels(user.Uuid)
 
 	var extensions []string
 	if extensionsStr != "" {
@@ -175,6 +177,7 @@ func (this *MatterController) Page(writer http.ResponseWriter, request *http.Req
 		deleted,
 		extensions,
 		spaceUuid,
+		requiredLabels,
 	)
 
 	return this.Success(pager)
@@ -193,6 +196,7 @@ func (this *MatterController) Search(writer http.ResponseWriter, request *http.R
 	}
 
 	user := this.checkUser(request)
+	requiredLabels := this.matterService.RequiredLabels(user.Uuid)
 	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
 	this.spaceService.CheckReadableByUuid(request, user, spaceUuid)
 
@@ -203,6 +207,7 @@ func (this *MatterController) Search(writer http.ResponseWriter, request *http.R
 		keyword,
 		spaceUuid,
 		deleted,
+		requiredLabels,
 	)
 
 	//sort.

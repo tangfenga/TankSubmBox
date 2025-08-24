@@ -260,7 +260,7 @@ func (this *UserService) CreateUser(request *http.Request, username string, size
 		Password: util.GetBcrypt(password),
 		Role:     role,
 		Status:   USER_STATUS_OK,
-		Group: userGroup,
+		Group:    userGroup,
 	}
 
 	user = this.userDao.Create(user)
