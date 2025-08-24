@@ -76,6 +76,40 @@ func (this *MatterDao) CheckWithRootByUuid(uuid string, space *Space) *Matter {
 	return matter
 }
 
+// target is the uuid of target matter
+func (this *MatterDao) AddLabel(name, target string, value int) {
+	uuid, _ := uuid.NewV4()
+	db := core.CONTEXT.GetDB().Create(&Labeled{Uuid: uuid.String(), Name: name, Target: target, Value: value})
+	if db.Error != nil {
+		panic(db.Error)
+	}
+}
+
+func (this *MatterDao) GetMatterLabel(uuid string) []Label {
+	var res []Label
+	var labeled []Labeled
+	db := core.CONTEXT.GetDB().Where(&Labeled{Target: uuid}).Find(&labeled)
+
+	if db.Error != nil {
+		panic(db.Error)
+	}
+
+	for i := range labeled {
+		var label []Label
+		core.CONTEXT.GetDB().Where(&Label{Name: labeled[i].Name}).Find(&label)
+		if len(label) == 1 {
+			label[0].Value = labeled[i].Value
+			res = append(res, label...)
+		}
+	}
+
+	return res
+}
+
+func (this *MatterDao) DeleteLabel(name, target string) {
+	core.CONTEXT.GetDB().Where("name = ? AND target = ?", name, target).Delete(&Labeled{})
+}
+
 // find by path. if path=/, then return the Root Matter
 func (this *MatterDao) CheckWithRootByPath(path string, user *User, space *Space) *Matter {
 

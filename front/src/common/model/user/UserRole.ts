@@ -16,6 +16,11 @@ interface UserGroup {
   editable: boolean;
 }
 
+interface Label {
+  id: number;
+  name: string;
+  type: 'bool' | 'numb';
+}
 
 let UserRoles: UserRole[] = Object.keys(UserRole).map((k) => k as UserRole);
 
@@ -42,5 +47,5 @@ UserRoles.forEach((type: UserRole, index: number) => {
   UserRoleList.push(UserRoleMap[type]);
 });
 
-export { UserRole, UserRoles, UserRoleMap, UserRoleList };  export type { UserGroup };
+export { UserRole, UserRoles, UserRoleMap, UserRoleList };  export type { UserGroup, Label };
 

@@ -25,12 +25,15 @@ import ClipboardUtil from '../../../common/util/ClipboardUtil';
 import Lang from '../../../common/model/global/Lang';
 import MatterDeleteModal from './MatterDeleteModal';
 import { SpaceMemberRole } from '../../../common/model/space/member/SpaceMemberRole';
+import { Label } from '../../../common/model/user/UserRole';
+import MatterLabelsManager from './MatterLabelsManager';
 
 interface IProps {
   matter: Matter;
   mode: 'normal' | 'space'; // normal:正常模式，space:空间模式
   spaceMemberRole?: SpaceMemberRole; // 用户在当前空间下的角色,只有在space模式下才有值
   director?: Director;
+  allLabels: Label[];
   onCreateDirectoryCallback?: () => any;
   onDeleteSuccess?: () => any;
   onCheckMatter?: (matter?: Matter) => any;
@@ -283,6 +286,13 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
                 }
               />
             </Tooltip>
+          )}
+          {matter.dir && (
+            <MatterLabelsManager
+              allLabels={this.props.allLabels}
+              uuid={this.props.matter.uuid ?? ''}
+              userUuid={this.props.matter.userUuid}
+            ></MatterLabelsManager>
           )}
           <Tooltip title={Lang.t('matter.download')}>
             <DownloadOutlined

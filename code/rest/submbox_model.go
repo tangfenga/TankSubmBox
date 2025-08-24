@@ -3,6 +3,7 @@ package rest
 type Label struct {
 	Name string `json:"name" gorm:"type:varchar(45);primary_key;not null"`
 	Type string `json:"type" gorm:"type:char(4);not null;default:'bool'"`
+	Value int `json:"value" gorm:"type:int;not null;default:0"`
 }
 
 type Group struct {

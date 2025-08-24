@@ -94,6 +94,10 @@ func (this *MatterController) RegisterRoutes() map[string]func(writer http.Respo
 	routeMap["/api/matter/change/privacy"] = this.Wrap(this.ChangePrivacy, USER_ROLE_USER)
 	routeMap["/api/matter/move"] = this.Wrap(this.Move, USER_ROLE_USER)
 
+	routeMap["/api/matter/label/create"] = this.Wrap(this.AddLabel, USER_ROLE_USER)
+	routeMap["/api/matter/label/delete"] = this.Wrap(this.DeleteLabel, USER_ROLE_USER)
+	routeMap["/api/matter/label"] = this.Wrap(this.MatterLabels, USER_ROLE_USER)
+
 	//mirror local files.
 	routeMap["/api/matter/mirror"] = this.Wrap(this.Mirror, USER_ROLE_USER)
 	routeMap["/api/matter/zip"] = this.Wrap(this.Zip, USER_ROLE_USER)
@@ -330,6 +334,36 @@ func (this *MatterController) SoftDelete(writer http.ResponseWriter, request *ht
 	this.matterService.AtomicSoftDelete(request, matter, user, space)
 
 	return this.Success("OK")
+}
+
+func (this *MatterController) AddLabel(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	labelName := util.ExtractRequestString(request, "labelName")
+	target := util.ExtractRequestString(request, "target")
+	value := util.ExtractRequestInt64(request, "value")
+	userUuid := util.ExtractRequestString(request, "userUuid")
+	matter := this.matterDao.FindByUuid(target)
+	if !matter.Dir {
+		panic(result.BadRequest("can't attach label on file"))
+	}
+	this.matterService.AddLabel(labelName, target, userUuid, int(value))
+	return this.Success("OK")
+}
+
+func (this *MatterController) DeleteLabel(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	name := util.ExtractRequestString(request, "labelName")
+	target := util.ExtractRequestString(request, "target")
+	matter := this.matterDao.FindByUuid(target)
+	if !matter.Dir {
+		panic(result.BadRequest("can't attach label on file"))
+	}
+	this.matterDao.DeleteLabel(name, target)
+	return this.Success("OK")
+}
+
+func (this *MatterController) MatterLabels(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	uuid := util.ExtractRequestString(request, "uuid")
+	res := this.matterDao.GetMatterLabel(uuid)
+	return this.Success(res)
 }
 
 func (this *MatterController) SoftDeleteBatch(writer http.ResponseWriter, request *http.Request) *result.WebResult {

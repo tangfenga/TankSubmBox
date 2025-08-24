@@ -58,6 +58,8 @@ import MatterCrawlModal from './widget/MatterCrawlModal';
 import SpaceMember from '../../common/model/space/member/SpaceMember';
 import { SpaceMemberRole } from '../../common/model/space/member/SpaceMemberRole';
 import { debounce } from '../../common/util/OptimizeUtil';
+import HttpUtil from '../../common/util/HttpUtil';
+import { Label, UserGroup } from '../../common/model/user/UserRole';
 
 interface IProps {
   spaceUuid?: string;
@@ -120,6 +122,8 @@ export default class List extends TankComponent<IProps, IState> {
     loading: false,
     data: [],
   };
+
+  labelList: Label[] = [];
 
   // 当前是否有关键词是搜索状态，逻辑上有不一样
   isSearch() {
@@ -209,6 +213,31 @@ export default class List extends TankComponent<IProps, IState> {
     this.refreshBreadcrumbs();
     this.drag.register();
     this.paste.register();
+    let cnt = 0;
+    HttpUtil.httpGet(
+      '/api/user/label',
+      {},
+      (res: { data: { data: Label[] } }) => {
+        this.labelList = res.data.data.map((l) => {
+          l.id = cnt;
+          cnt += 1;
+          return l;
+        });
+        HttpUtil.httpGet(
+          '/api/user/group/get',
+          { name: this.user.userGroup },
+          (res: { data: { data: UserGroup } }) => {
+            const editable: string[] = JSON.parse(
+              res.data.data.editable_labels
+            );
+            this.labelList = this.labelList.filter((l) =>
+              editable.find((s) => s == l.name)
+            );
+            this.updateUI();
+          }
+        );
+      }
+    );
   }
 
   componentWillUnmount() {
@@ -792,7 +821,8 @@ export default class List extends TankComponent<IProps, IState> {
                     </Button>
                   </Upload>
                   <Button
-                    type="primary" className="mb10"
+                    type="primary"
+                    className="mb10"
                     onClick={() => this.uploadDirectoryBtnRef.current?.click()}
                   >
                     <CloudUploadOutlined />
@@ -862,6 +892,7 @@ export default class List extends TankComponent<IProps, IState> {
             mode="normal"
             ref={this.newMatterRef}
             matter={this.newMatter}
+            allLabels={this.labelList}
             director={director}
             onCreateDirectoryCallback={() => this.refresh()}
           />
@@ -882,6 +913,7 @@ export default class List extends TankComponent<IProps, IState> {
                   key={matter.uuid}
                   director={director}
                   matter={matter}
+                  allLabels={this.labelList}
                   onGoToDirectory={(id) => this.goToDirectory(id)}
                   onDeleteSuccess={() => this.pagerAndCapacityRefresh()}
                   onCheckMatter={(m) => this.checkMatter(m)}

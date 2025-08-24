@@ -106,8 +106,8 @@ func (this *UserDao) AppendGroup(g Group) {
 	}
 }
 
-func (this *UserDao) FindGroupByName(name string) *Label {
-	var res = &Label{}
+func (this *UserDao) FindGroupByName(name string) *Group {
+	var res = &Group{}
 	db := core.CONTEXT.GetDB().Where(&Group{Name: name}).First(res)
 	if db.Error != nil {
 		if db.Error.Error() == result.DB_ERROR_NOT_FOUND {

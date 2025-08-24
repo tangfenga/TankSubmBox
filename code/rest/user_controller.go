@@ -77,6 +77,7 @@ func (this *UserController) RegisterRoutes() map[string]func(writer http.Respons
 	routeMap["/api/user/group/delete"] = this.Wrap(this.DeleteUserGroup, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/group/create"] = this.Wrap(this.CreateUserGroup, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/group"] = this.Wrap(this.UserGroups, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/user/group/get"] = this.Wrap(this.GetUserGroup, USER_ROLE_USER)
 
 	return routeMap
 }
@@ -252,6 +253,13 @@ func (this *UserController) UserGroups(writer http.ResponseWriter, request *http
 	// panic(fmt.Sprintf("%v %v", res[0].Name, res[0].Type))
 	return this.Success(res)
 }
+
+func (this *UserController) GetUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	name := request.FormValue("name")
+	res := this.userDao.FindGroupByName(name)
+	return this.Success(res)
+}
+
 
 func (this *UserController) Create(writer http.ResponseWriter, request *http.Request) *result.WebResult {
 

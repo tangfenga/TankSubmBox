@@ -2,6 +2,7 @@ package rest
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -203,6 +204,26 @@ func (this *MatterService) DownloadFile(
 	withContentDisposition bool) {
 
 	download.DownloadFile(writer, request, filePath, filename, withContentDisposition)
+}
+
+func (this *MatterService) AddLabel(labelname, target, userUuid string, value int) {
+	group := this.userDao.FindByUuid(userUuid).Group
+	groupInfo := this.userDao.FindGroupByName(group)
+	var allowLabel []string
+	json.Unmarshal([]byte(groupInfo.EditableLabels), &allowLabel)
+	
+	allow := false
+	for i := range allowLabel {
+		if allowLabel[i] == labelname {
+			allow = true
+		}
+	}
+
+	if !allow {
+		panic(result.BadRequest("invalid label"))
+	}
+
+	this.matterDao.AddLabel(labelname, target, value)
 }
 
 // Download specified matters. matters must have the same puuid.
