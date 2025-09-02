@@ -7,9 +7,7 @@ MAIN_GO=main.go
 all: build
 
 build-front:
-	@echo "构建前端..."
 	cd $(FRONT_DIR) && yarn build
-	@echo "将前端构建产物复制到$(HTML_DIR)目录..."
 	rm -rf $(HTML_DIR)
 	mkdir $(HTML_DIR)
 	cp -R $(BUILD_DIR)/* $(HTML_DIR)/
