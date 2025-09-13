@@ -3,6 +3,8 @@ import BaseEntity from '../base/BaseEntity';
 import PreviewConfig from './model/PreviewConfig';
 import JsonUtil from '../../util/JsonUtil';
 import ScanConfig from './model/ScanConfig';
+import CollegeConfig from './model/CollegeConfig';
+import TrackConfig from './model/TrackConfig';
 
 export default class Preference extends BaseEntity {
   //获取当前登录者的信息
@@ -38,6 +40,10 @@ export default class Preference extends BaseEntity {
   previewConfig: PreviewConfig = new PreviewConfig();
   //扫描磁盘配置
   scanConfig: ScanConfig = new ScanConfig();
+  //学院配置
+  collegeConfig: CollegeConfig = new CollegeConfig();
+  //赛道配置
+  trackConfig: TrackConfig = new TrackConfig();
   //后台版本
   version: string | null = null;
 
@@ -54,6 +60,8 @@ export default class Preference extends BaseEntity {
 
     this.assignEntity('previewConfig', PreviewConfig);
     this.assignEntity('scanConfig', ScanConfig);
+    this.assignEntity('collegeConfig', CollegeConfig);
+    this.assignEntity('trackConfig', TrackConfig);
   }
 
   getTAG(): string {
@@ -78,6 +86,8 @@ export default class Preference extends BaseEntity {
       allowRegister: this.allowRegister,
       previewConfig: JsonUtil.toJson(this.previewConfig.getForm()),
       scanConfig: JsonUtil.toJson(this.scanConfig.getForm()),
+      collegeConfig: JsonUtil.toJson(this.collegeConfig.getForm()),
+      trackConfig: JsonUtil.toJson(this.trackConfig.getForm()),
     };
   }
 

@@ -2,7 +2,6 @@ package rest
 
 import (
 	"archive/zip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -141,16 +140,7 @@ func (this *MatterService) Page(
 }
 
 func (this *MatterService) RequiredLabels(uuid string) []string {
-	group := this.userDao.FindByUuid(uuid).Group
-	groupInfo := this.userDao.FindGroupByName(group)
-
-	if groupInfo == nil {
-		return make([]string, 0)
-	}
-
-	var allowLabel []string
-	json.Unmarshal([]byte(groupInfo.Display), &allowLabel)
-	return allowLabel
+	return make([]string, 0)
 }
 
 
@@ -224,22 +214,7 @@ func (this *MatterService) DownloadFile(
 
 
 func (this *MatterService) AddLabel(labelname, target, userUuid string, value int) {
-	group := this.userDao.FindByUuid(userUuid).Group
-	groupInfo := this.userDao.FindGroupByName(group)
-	var allowLabel []string
-	json.Unmarshal([]byte(groupInfo.EditableLabels), &allowLabel)
-	
-	allow := false
-	for i := range allowLabel {
-		if allowLabel[i] == labelname {
-			allow = true
-		}
-	}
-
-	if !allow {
-		panic(result.BadRequest("invalid label"))
-	}
-
+	// Label system has been removed, this method is kept for compatibility
 	this.matterDao.AddLabel(labelname, target, value)
 }
 

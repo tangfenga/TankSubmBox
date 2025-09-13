@@ -34,7 +34,6 @@ export default class User extends BaseEntity {
   status: UserStatus = UserStatus.OK;
   spaceUuid: string | null = null;
   space: Space = new Space();
-  userGroup: string | null = null;
 
   constructor(reactComponent?: React.Component) {
     super(reactComponent);
@@ -45,7 +44,6 @@ export default class User extends BaseEntity {
 
     this.assignEntity('lastTime', Date);
     this.assignEntity('space', Space);
-    // this.assignEntity('userGroup', )
   }
 
   hasLogin(): boolean {
@@ -76,7 +74,6 @@ export default class User extends BaseEntity {
       role: this.role,
       avatarUrl: this.avatarUrl,
       uuid: this.uuid ? this.uuid : null,
-      userGroup: this.userGroup
     };
   }
 

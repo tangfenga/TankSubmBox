@@ -86,6 +86,11 @@ func (this *InstallController) Init() {
 		&Label{},
 		&Labeled{},
 		&Group{},
+		&UserProfile{},
+		&College{},
+		&Track{},
+		&Submission{},
+		&Rating{},
 	}
 
 }

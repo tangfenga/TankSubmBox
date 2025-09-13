@@ -22,6 +22,8 @@ type Preference struct {
 	PreviewConfig         string    `json:"previewConfig" gorm:"type:text"`
 	ScanConfig            string    `json:"scanConfig" gorm:"type:text"`
 	DeletedKeepDays       int64     `json:"deletedKeepDays" gorm:"type:bigint(20) not null;default:7"`
+	CollegeConfig         string    `json:"collegeConfig" gorm:"type:text"`
+	TrackConfig           string    `json:"trackConfig" gorm:"type:text"`
 	Version               string    `json:"version" gorm:"-"`
 }
 
@@ -56,6 +58,50 @@ func (this *Preference) FetchScanConfig() *ScanConfig {
 	} else {
 		m := &ScanConfig{}
 
+		err := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal([]byte(json), &m)
+		if err != nil {
+			panic(err)
+		}
+		return m
+	}
+}
+
+// CollegeConfig struct
+type CollegeConfig struct {
+	EnabledColleges []int64 `json:"enabledColleges"`
+}
+
+// TrackConfig struct
+type TrackConfig struct {
+	EnabledTracks []int64 `json:"enabledTracks"`
+}
+
+// fetch the college config
+func (this *Preference) FetchCollegeConfig() *CollegeConfig {
+	json := this.CollegeConfig
+	if json == "" || json == EMPTY_JSON_MAP {
+		return &CollegeConfig{
+			EnabledColleges: []int64{},
+		}
+	} else {
+		m := &CollegeConfig{}
+		err := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal([]byte(json), &m)
+		if err != nil {
+			panic(err)
+		}
+		return m
+	}
+}
+
+// fetch the track config
+func (this *Preference) FetchTrackConfig() *TrackConfig {
+	json := this.TrackConfig
+	if json == "" || json == EMPTY_JSON_MAP {
+		return &TrackConfig{
+			EnabledTracks: []int64{},
+		}
+	} else {
+		m := &TrackConfig{}
 		err := jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal([]byte(json), &m)
 		if err != nil {
 			panic(err)

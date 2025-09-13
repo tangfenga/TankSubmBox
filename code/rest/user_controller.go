@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -74,10 +73,6 @@ func (this *UserController) RegisterRoutes() map[string]func(writer http.Respons
 	routeMap["/api/user/label/delete"] = this.Wrap(this.DeleteLabel, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/label/create"] = this.Wrap(this.CreateLabel, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/user/label"] = this.Wrap(this.Labels, USER_ROLE_USER)
-	routeMap["/api/user/group/delete"] = this.Wrap(this.DeleteUserGroup, USER_ROLE_ADMINISTRATOR)
-	routeMap["/api/user/group/create"] = this.Wrap(this.CreateUserGroup, USER_ROLE_ADMINISTRATOR)
-	routeMap["/api/user/group"] = this.Wrap(this.UserGroups, USER_ROLE_ADMINISTRATOR)
-	routeMap["/api/user/group/get"] = this.Wrap(this.GetUserGroup, USER_ROLE_USER)
 
 	return routeMap
 }
@@ -180,7 +175,6 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 
 	username := request.FormValue("username")
 	password := request.FormValue("password")
-	userGroup := request.FormValue("userGroup")
 
 	preference := this.preferenceService.Fetch()
 	if !preference.AllowRegister {
@@ -199,7 +193,7 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 		panic(result.BadRequestI18n(request, i18n.UsernameExist, username))
 	}
 
-	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER, userGroup)
+	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER)
 
 	//auto login
 	this.innerLogin(writer, request, user)
@@ -226,39 +220,6 @@ func (this *UserController) Labels(writer http.ResponseWriter, request *http.Req
 	return this.Success(res)
 }
 
-func (this *UserController) CreateUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
-	jsonData := request.FormValue("data")
-	var data Group
-	err := json.Unmarshal([]byte(jsonData), &data)
-	if err != nil {
-		panic(result.BadRequest("%v", err))
-	}
-	this.userService.CreateUserGroup(data)
-	return this.Success("")
-}
-
-func (this *UserController) DeleteUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
-	jsonData := request.FormValue("data")
-	var data Group
-	err := json.Unmarshal([]byte(jsonData), &data)
-	if err != nil {
-		panic(result.BadRequest("%v", err))
-	}
-	this.userDao.DeleteUserGroup(data.Name)
-	return this.Success("")
-}
-
-func (this *UserController) UserGroups(writer http.ResponseWriter, request *http.Request) *result.WebResult {
-	res := this.userDao.AllUserGroups()
-	// panic(fmt.Sprintf("%v %v", res[0].Name, res[0].Type))
-	return this.Success(res)
-}
-
-func (this *UserController) GetUserGroup(writer http.ResponseWriter, request *http.Request) *result.WebResult {
-	name := request.FormValue("name")
-	res := this.userDao.FindGroupByName(name)
-	return this.Success(res)
-}
 
 
 func (this *UserController) Create(writer http.ResponseWriter, request *http.Request) *result.WebResult {
@@ -266,7 +227,6 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 	username := request.FormValue("username")
 	password := request.FormValue("password")
 	role := request.FormValue("role")
-	group := request.FormValue("userGroup")
 
 	sizeLimit := util.ExtractRequestInt64(request, "sizeLimit")
 	totalSizeLimit := util.ExtractRequestInt64(request, "totalSizeLimit")
@@ -288,11 +248,11 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 	}
 
 	//check user role.
-	if role != USER_ROLE_USER && role != USER_ROLE_ADMINISTRATOR {
+	if role != USER_ROLE_USER && role != USER_ROLE_ADMINISTRATOR && role != USER_ROLE_COLLEGE_ADMIN && role != USER_ROLE_JUDGE {
 		panic(result.BadRequestI18n(request, i18n.UserRoleError))
 	}
 
-	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role, group)
+	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role)
 
 	return this.Success(user)
 }
@@ -314,7 +274,7 @@ func (this *UserController) Edit(writer http.ResponseWriter, request *http.Reque
 	if operator.Role == USER_ROLE_ADMINISTRATOR {
 		//only admin can edit user's role and sizeLimit
 
-		if role == USER_ROLE_USER || role == USER_ROLE_ADMINISTRATOR {
+		if role == USER_ROLE_USER || role == USER_ROLE_ADMINISTRATOR || role == USER_ROLE_COLLEGE_ADMIN || role == USER_ROLE_JUDGE {
 			currentUser.Role = role
 		}
 

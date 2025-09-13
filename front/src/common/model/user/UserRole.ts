@@ -6,6 +6,8 @@ enum UserRole {
   GUEST = 'GUEST',
   USER = 'USER',
   ADMINISTRATOR = 'ADMINISTRATOR',
+  COLLEGE_ADMIN = 'COLLEGE_ADMIN',
+  JUDGE = 'JUDGE',
 }
 
 interface UserGroup {
@@ -39,6 +41,16 @@ let UserRoleMap: { [key in keyof typeof UserRole]: ColorSelectionOption } = {
     name: Lang.t('user.roleAdministrator'),
     value: 'ADMINISTRATOR',
     color: Color.DANGER,
+  },
+  COLLEGE_ADMIN: {
+    name: '学院管理员',
+    value: 'COLLEGE_ADMIN',
+    color: Color.INFO,
+  },
+  JUDGE: {
+    name: '评委',
+    value: 'JUDGE',
+    color: Color.SUCCESS,
   },
 };
 

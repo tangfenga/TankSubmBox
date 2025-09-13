@@ -166,6 +166,16 @@ func (this *TankContext) registerBeans() {
 	//downloadToken
 	this.registerBean(new(rest.DownloadTokenDao))
 
+	//college
+	this.registerBean(new(rest.CollegeController))
+	this.registerBean(new(rest.CollegeDao))
+	this.registerBean(new(rest.CollegeService))
+
+	//track
+	this.registerBean(new(rest.TrackController))
+	this.registerBean(new(rest.TrackDao))
+	this.registerBean(new(rest.TrackService))
+
 	//imageCache
 	this.registerBean(new(rest.ImageCacheController))
 	this.registerBean(new(rest.ImageCacheDao))

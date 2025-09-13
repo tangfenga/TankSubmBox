@@ -31,8 +31,6 @@ import Color from '../../common/model/base/option/Color';
 import TransfigurationModal from './widget/TransfigurationModal';
 import Lang from '../../common/model/global/Lang';
 import Moon from '../../common/model/global/Moon';
-import LabelManager from '../widget/LabelManager';
-import UserGroupManager from '../widget/UserGroupManager';
 
 interface IProps extends RouteComponentProps {}
 
@@ -202,16 +200,6 @@ export default class List extends TankComponent<IProps, IState> {
           DateUtil.simpleDateTime(text),
       },
       {
-        title: "用户组",
-        dataIndex: 'userGroup',
-        render: (text: any, record: User, index: number): React.ReactNode =>
-        (
-          <div>
-            {record.userGroup}
-          </div>
-        )
-      },
-      {
         title: Lang.t('operation'),
         dataIndex: 'action',
         render: (text: any, record: User) => (
@@ -280,7 +268,6 @@ export default class List extends TankComponent<IProps, IState> {
               {Lang.t('user.createUser')}
             </Button>
           </Link>
-          <LabelManager ></LabelManager>
         </TankTitle>
 
         <div>
@@ -303,8 +290,7 @@ export default class List extends TankComponent<IProps, IState> {
           }}
         />
         
-          <UserGroupManager></UserGroupManager>
-      </div>
+        </div>
     );
   }
 }

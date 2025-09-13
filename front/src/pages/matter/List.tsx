@@ -59,7 +59,7 @@ import SpaceMember from '../../common/model/space/member/SpaceMember';
 import { SpaceMemberRole } from '../../common/model/space/member/SpaceMemberRole';
 import { debounce } from '../../common/util/OptimizeUtil';
 import HttpUtil from '../../common/util/HttpUtil';
-import { Label, UserGroup } from '../../common/model/user/UserRole';
+import { Label } from '../../common/model/user/UserRole';
 
 interface IProps {
   spaceUuid?: string;
@@ -223,19 +223,6 @@ export default class List extends TankComponent<IProps, IState> {
           cnt += 1;
           return l;
         });
-        HttpUtil.httpGet(
-          '/api/user/group/get',
-          { name: this.user.userGroup },
-          (res: { data: { data: UserGroup } }) => {
-            const editable: string[] = JSON.parse(
-              res.data.data.editable_labels
-            );
-            this.labelList = this.labelList.filter((l) =>
-              editable.find((s) => s == l.name)
-            );
-            this.updateUI();
-          }
-        );
       }
     );
   }

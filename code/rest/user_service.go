@@ -253,14 +253,13 @@ func (this *UserService) RemoveCacheUserByUuid(userUuid string) {
 }
 
 // create user
-func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string, userGroup string) *User {
+func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string) *User {
 
 	user := &User{
 		Username: username,
 		Password: util.GetBcrypt(password),
 		Role:     role,
 		Status:   USER_STATUS_OK,
-		Group:    userGroup,
 	}
 
 	user = this.userDao.Create(user)
@@ -286,13 +285,6 @@ func (this *UserService) CreateLabel(labelName, labelType string) {
 	this.userDao.AppendLabel(Label{Name: labelName, Type: labelType})
 }
 
-func (this *UserService) CreateUserGroup(g Group) {
-	label := this.userDao.FindGroupByName(g.Name)
-	if label != nil {
-		panic(result.BadRequest("Group name already exists"))
-	}
-	this.userDao.AppendGroup(g)
-}
 
 // delete user
 func (this *UserService) DeleteUser(request *http.Request, currentUser *User) {
