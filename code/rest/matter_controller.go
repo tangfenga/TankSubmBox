@@ -178,6 +178,7 @@ func (this *MatterController) Page(writer http.ResponseWriter, request *http.Req
 		extensions,
 		spaceUuid,
 		requiredLabels,
+		user.Uuid,
 	)
 
 	return this.Success(pager)

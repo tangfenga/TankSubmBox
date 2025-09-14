@@ -175,6 +175,11 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 
 	username := request.FormValue("username")
 	password := request.FormValue("password")
+	realName := request.FormValue("realName")
+	studentId := request.FormValue("studentId")
+	college := request.FormValue("college")
+	phoneNumber := request.FormValue("phoneNumber")
+	userType := request.FormValue("userType")
 
 	preference := this.preferenceService.Fetch()
 	if !preference.AllowRegister {
@@ -193,7 +198,7 @@ func (this *UserController) Register(writer http.ResponseWriter, request *http.R
 		panic(result.BadRequestI18n(request, i18n.UsernameExist, username))
 	}
 
-	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER)
+	user := this.userService.CreateUser(request, username, -1, preference.DefaultTotalSizeLimit, password, USER_ROLE_USER, college, realName, phoneNumber, userType, studentId)
 
 	//auto login
 	this.innerLogin(writer, request, user)
@@ -227,6 +232,7 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 	username := request.FormValue("username")
 	password := request.FormValue("password")
 	role := request.FormValue("role")
+	college := request.FormValue("college")
 
 	sizeLimit := util.ExtractRequestInt64(request, "sizeLimit")
 	totalSizeLimit := util.ExtractRequestInt64(request, "totalSizeLimit")
@@ -252,7 +258,12 @@ func (this *UserController) Create(writer http.ResponseWriter, request *http.Req
 		panic(result.BadRequestI18n(request, i18n.UserRoleError))
 	}
 
-	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role)
+	// 验证学院管理员必须选择学院
+	if role == USER_ROLE_COLLEGE_ADMIN && college == "" {
+		panic(result.BadRequest("学院管理员必须选择学院"))
+	}
+
+	user := this.userService.CreateUser(request, username, sizeLimit, totalSizeLimit, password, role, college, "", "", "", "")
 
 	return this.Success(user)
 }

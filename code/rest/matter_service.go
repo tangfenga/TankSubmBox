@@ -35,6 +35,8 @@ type MatterService struct {
 	imageCacheDao     *ImageCacheDao
 	imageCacheService *ImageCacheService
 	preferenceService *PreferenceService
+	submissionDao     *SubmissionDao
+	userProfileDao    *UserProfileDao
 }
 
 func (this *MatterService) Init() {
@@ -75,6 +77,16 @@ func (this *MatterService) Init() {
 		this.preferenceService = b
 	}
 
+	b = core.CONTEXT.GetBean(this.submissionDao)
+	if b, ok := b.(*SubmissionDao); ok {
+		this.submissionDao = b
+	}
+
+	b = core.CONTEXT.GetBean(this.userProfileDao)
+	if b, ok := b.(*UserProfileDao); ok {
+		this.userProfileDao = b
+	}
+
 }
 
 // get the page of matters.
@@ -97,6 +109,7 @@ func (this *MatterService) Page(
 	extensions []string,
 	spaceUuid string,
 	requiredLabels []string,
+	userUuid string,
 ) *Pager {
 
 	sortArray := []builder.OrderPair{
@@ -134,12 +147,18 @@ func (this *MatterService) Page(
 		},
 	}
 
-	pager := this.matterDao.Page(page, pageSize, puuid, "", spaceUuid, name, dir, deleted, extensions, sortArray, requiredLabels)
+	pager := this.matterDao.Page(page, pageSize, puuid, userUuid, spaceUuid, name, dir, deleted, extensions, sortArray, requiredLabels)
 
 	return pager
 }
 
 func (this *MatterService) RequiredLabels(uuid string) []string {
+	user := this.userDao.FindByUuid(uuid)
+	if user != nil && user.Role == USER_ROLE_COLLEGE_ADMIN {
+		this.logger.Info("User %s is college admin, returning college_admin label", uuid)
+		return []string{"college_admin"}
+	}
+	this.logger.Info("User %s is not college admin, role: %s", uuid, user.Role)
 	return make([]string, 0)
 }
 
@@ -780,6 +799,29 @@ func (this *MatterService) createDirectory(request *http.Request, dirMatter *Mat
 	}
 
 	matter = this.matterDao.Create(matter)
+
+	// 创建提交记录（文件夹上传）
+	// 获取用户档案信息
+	userProfile := this.userProfileDao.FindByUserUuid(user.Uuid)
+	if userProfile != nil {
+		// 创建提交记录
+		submission := &Submission{
+			MatterUuid: matter.Uuid,
+			TrackId:     0, // 默认为0，需要后续设置
+			CollegeId:   0, // 默认为0，需要后续设置
+			Title:       matter.Name,
+			AuthorName:  userProfile.RealName,
+			AuthorId:    userProfile.StudentId,
+			IsRecommended: false,
+			RecommendedAt: time.Now(),
+			CreateTime:  time.Now(),
+			UpdateTime:  time.Now(),
+		}
+		this.submissionDao.Create(submission)
+		this.logger.Info("Created submission for folder: matterUuid=%s, authorId=%s, college=%s", matter.Uuid, userProfile.StudentId, userProfile.College)
+	} else {
+		this.logger.Warn("No user profile found for user %s, skipping submission creation", user.Uuid)
+	}
 
 	return matter
 }

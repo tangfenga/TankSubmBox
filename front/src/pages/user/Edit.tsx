@@ -21,6 +21,7 @@ import Lang from '../../common/model/global/Lang';
 import MatterImage from '../matter/widget/MatterImage';
 import InputSize from '../widget/form/InputSize';
 import HttpUtil from '../../common/util/HttpUtil';
+import College from '../../common/model/college/College';
 
 interface RouteParam {
   uuid: string;
@@ -28,7 +29,9 @@ interface RouteParam {
 
 interface IProps extends RouteComponentProps<RouteParam> {}
 
-interface IState {}
+interface IState {
+  colleges: any[];
+}
 
 export default class Edit extends TankComponent<IProps, IState> {
   formRef = React.createRef<FormInstance>();
@@ -42,24 +45,39 @@ export default class Edit extends TankComponent<IProps, IState> {
   currentUser: User = new User(this);
 
 
+  collegeModel: College = new College(this);
+
   constructor(props: IProps) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      colleges: [],
+    };
     this.currentUser.role = UserRole.USER;
   }
 
   componentDidMount() {
     let match = this.props.match;
 
-    if (match.params.uuid) {
-      this.createMode = false;
-      this.currentUser.uuid = match.params.uuid;
-      this.currentUser.httpDetail();
-    } else {
-      this.createMode = true;
-      this.updateUI();
-    }
+    // 加载学院列表
+    this.collegeModel.httpList(
+      () => {
+        this.setState({
+          colleges: this.collegeModel.colleges,
+        });
+      },
+      undefined,
+      () => {
+        if (match.params.uuid) {
+          this.createMode = false;
+          this.currentUser.uuid = match.params.uuid;
+          this.currentUser.httpDetail();
+        } else {
+          this.createMode = true;
+          this.updateUI();
+        }
+      }
+    );
   }
 
   onFinish(values: any) {
@@ -214,6 +232,39 @@ export default class Edit extends TankComponent<IProps, IState> {
                 })}
               </Select>
             </Form.Item>
+
+            {roleEditable && (
+              <Form.Item
+                noStyle
+                shouldUpdate={(prevValues, currentValues) =>
+                  prevValues.role !== currentValues.role
+                }
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue('role') === UserRole.COLLEGE_ADMIN ? (
+                    <Form.Item
+                      label="学院"
+                      name="college"
+                      initialValue={currentUser.college}
+                      rules={[
+                        {
+                          required: true,
+                          message: '请选择学院',
+                        },
+                      ]}
+                    >
+                      <Select placeholder="请选择学院">
+                        {this.state.colleges.map((college: any) => (
+                          <Select.Option key={college.id} value={college.name}>
+                            {college.name}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            )}
 
             <Form.Item
               label={Lang.t('user.singleFileSizeLimit')}

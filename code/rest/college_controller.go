@@ -26,7 +26,7 @@ func (this *CollegeController) Init() {
 func (this *CollegeController) RegisterRoutes() map[string]func(writer http.ResponseWriter, request *http.Request) {
 	routeMap := make(map[string]func(writer http.ResponseWriter, request *http.Request))
 
-	routeMap["/api/college/list"] = this.Wrap(this.List, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/college/list"] = this.Wrap(this.List, USER_ROLE_GUEST)
 	routeMap["/api/college/create"] = this.Wrap(this.Create, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/college/bulk-create"] = this.Wrap(this.BulkCreate, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/college/delete"] = this.Wrap(this.Delete, USER_ROLE_ADMINISTRATOR)

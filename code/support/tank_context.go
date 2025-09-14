@@ -227,7 +227,9 @@ func (this *TankContext) registerBeans() {
 	//user
 	this.registerBean(new(rest.UserController))
 	this.registerBean(new(rest.UserDao))
+	this.registerBean(new(rest.UserProfileDao))
 	this.registerBean(new(rest.UserService))
+	this.registerBean(new(rest.SubmissionDao))
 }
 
 func (this *TankContext) GetBean(bean core.Bean) core.Bean {

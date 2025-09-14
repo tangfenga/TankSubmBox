@@ -482,26 +482,62 @@ func (this *MatterDao) PlainPage(
     }
 
     var selectedUuid []string
-    nameCount := len(requiredLabels)
+    
+    // 学院管理员过滤逻辑：检查第一个标签是否为 "college_admin"
+    if len(requiredLabels) > 0 && requiredLabels[0] == "college_admin" {
+        // 学院管理员只能查看自己学院的提交作品
+        
+        // 获取当前用户的学院
+        var currentUserCollege string
+        err := core.CONTEXT.GetDB().Model(&UserProfile{}).
+            Where("user_uuid = ?", userUuid).
+            Pluck("college", &currentUserCollege).
+            Error
+        if err != nil {
+            panic(err)
+        }
 
-	fmt.Printf("required %v", requiredLabels)
+        this.logger.Info("College admin filtering: userUuid=%s, college=%s", userUuid, currentUserCollege)
 
-    err := core.CONTEXT.GetDB().Model(&Labeled{}).
-        Where("name IN (?)", requiredLabels).
-        Group("target").
-        Having("COUNT(DISTINCT name) = ?", nameCount).
-        Pluck("target", &selectedUuid).
-        Error
+        // 查找所有属于该学院的用户的提交作品
+        err = core.CONTEXT.GetDB().Model(&Submission{}).
+            Joins("JOIN user_profile ON submission.author_id = user_profile.student_id").
+            Where("user_profile.college = ?", currentUserCollege).
+            Pluck("matter_uuid", &selectedUuid).
+            Error
 
-		
-	fmt.Printf("selected %v", selectedUuid)
 
-    if err != nil {
-        panic(err)
-    }
+        if err != nil {
+            panic(err)
+        }
 
-    if len(selectedUuid) == 0 {
-        return 0, []*Matter{}
+        this.logger.Info("College admin filtering found %d submissions", len(selectedUuid))
+
+        if len(selectedUuid) == 0 {
+            return 0, []*Matter{}
+        }
+    } else {
+        // 原有的标签过滤逻辑
+        nameCount := len(requiredLabels)
+
+        fmt.Printf("required %v", requiredLabels)
+
+        err := core.CONTEXT.GetDB().Model(&Labeled{}).
+            Where("name IN (?)", requiredLabels).
+            Group("target").
+            Having("COUNT(DISTINCT name) = ?", nameCount).
+            Pluck("target", &selectedUuid).
+            Error
+
+        fmt.Printf("selected %v", selectedUuid)
+
+        if err != nil {
+            panic(err)
+        }
+
+        if len(selectedUuid) == 0 {
+            return 0, []*Matter{}
+        }
     }
 
     var wp = &builder.WherePair{}
@@ -509,11 +545,6 @@ func (this *MatterDao) PlainPage(
     if puuid != "" {
         wp = wp.And(&builder.WherePair{Query: "puuid = ?", Args: []any{puuid}})
     }
-
-    if userUuid != "" {
-        wp = wp.And(&builder.WherePair{Query: "user_uuid = ?", Args: []any{userUuid}})
-    }
-
 
     if name != "" {
         wp = wp.And(&builder.WherePair{Query: "name LIKE ?", Args: []any{"%" + name + "%"}})

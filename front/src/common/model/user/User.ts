@@ -34,6 +34,7 @@ export default class User extends BaseEntity {
   status: UserStatus = UserStatus.OK;
   spaceUuid: string | null = null;
   space: Space = new Space();
+  college: string = '';
 
   constructor(reactComponent?: React.Component) {
     super(reactComponent);
@@ -74,6 +75,7 @@ export default class User extends BaseEntity {
       role: this.role,
       avatarUrl: this.avatarUrl,
       uuid: this.uuid ? this.uuid : null,
+      college: this.college,
     };
   }
 
@@ -117,6 +119,7 @@ export default class User extends BaseEntity {
   httpRegister(
     username: string,
     password: string,
+    profileInfo?: any,
     successCallback?: any,
     errorCallback?: any,
     finalCallback?: any
@@ -126,6 +129,7 @@ export default class User extends BaseEntity {
     let form = {
       username,
       password,
+      ...profileInfo,
     };
 
     this.httpGet(

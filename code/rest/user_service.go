@@ -15,8 +15,9 @@ import (
 // @Service
 type UserService struct {
 	BaseBean
-	userDao    *UserDao
-	sessionDao *SessionDao
+	userDao        *UserDao
+	userProfileDao *UserProfileDao
+	sessionDao     *SessionDao
 
 	spaceService *SpaceService
 
@@ -41,6 +42,11 @@ func (this *UserService) Init() {
 	b := core.CONTEXT.GetBean(this.userDao)
 	if b, ok := b.(*UserDao); ok {
 		this.userDao = b
+	}
+
+	b = core.CONTEXT.GetBean(this.userProfileDao)
+	if b, ok := b.(*UserProfileDao); ok {
+		this.userProfileDao = b
 	}
 
 	b = core.CONTEXT.GetBean(this.sessionDao)
@@ -253,7 +259,7 @@ func (this *UserService) RemoveCacheUserByUuid(userUuid string) {
 }
 
 // create user
-func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string) *User {
+func (this *UserService) CreateUser(request *http.Request, username string, sizeLimit int64, totalSizeLimit int64, password string, role string, college string, realName string, phoneNumber string, userType string, studentId string) *User {
 
 	user := &User{
 		Username: username,
@@ -272,6 +278,21 @@ func (this *UserService) CreateUser(request *http.Request, username string, size
 	this.userDao.Save(user)
 
 	user.Space = space
+
+	// 创建用户档案
+	if college != "" || realName != "" || phoneNumber != "" || userType != "" || studentId != "" {
+		userProfile := &UserProfile{
+			UserUuid:    user.Uuid,
+			RealName:    realName,
+			College:     college,
+			PhoneNumber: phoneNumber,
+			UserType:    userType,
+			StudentId:   studentId,
+			CreateTime:  time.Now(),
+			UpdateTime:  time.Now(),
+		}
+		this.userProfileDao.Create(userProfile)
+	}
 
 	return user
 
