@@ -22,6 +22,9 @@ type MatterController struct {
 	shareService      *ShareService
 	bridgeDao         *BridgeDao
 	imageCacheService *ImageCacheService
+	userProfileDao    *UserProfileDao
+	submissionDao     *SubmissionDao
+	collegeDao        *CollegeDao
 }
 
 func (this *MatterController) Init() {
@@ -70,6 +73,21 @@ func (this *MatterController) Init() {
 	b = core.CONTEXT.GetBean(this.imageCacheService)
 	if b, ok := b.(*ImageCacheService); ok {
 		this.imageCacheService = b
+	}
+
+	b = core.CONTEXT.GetBean(this.userProfileDao)
+	if b, ok := b.(*UserProfileDao); ok {
+		this.userProfileDao = b
+	}
+
+	b = core.CONTEXT.GetBean(this.submissionDao)
+	if b, ok := b.(*SubmissionDao); ok {
+		this.submissionDao = b
+	}
+
+	b = core.CONTEXT.GetBean(this.collegeDao)
+	if b, ok := b.(*CollegeDao); ok {
+		this.collegeDao = b
 	}
 }
 
@@ -239,6 +257,12 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 
 	puuid := util.ExtractRequestString(request, "puuid")
 	name := util.ExtractRequestString(request, "name")
+	trackIdStr := util.ExtractRequestOptionalString(request, "trackId", "")
+	var trackId int64 = 0
+	if trackIdStr != "" {
+		trackId = util.ExtractRequestInt64(request, "trackId")
+	}
+	workName := util.ExtractRequestOptionalString(request, "workName", "")
 	user := this.checkUser(request)
 	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
 	space := this.spaceService.CheckWritableByUuid(request, user, spaceUuid)
@@ -246,6 +270,45 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 	var dirMatter = this.matterDao.CheckWithRootByUuid(puuid, space)
 
 	matter := this.matterService.AtomicCreateDirectory(request, dirMatter, name, user, space)
+	
+	// 如果是普通用户创建文件夹，并且提供了赛道和作品名，则更新提交信息
+	if user.Role == USER_ROLE_USER && trackId > 0 && workName != "" {
+		// 获取用户档案信息
+		userProfile := this.userProfileDao.FindByUserUuid(user.Uuid)
+		if userProfile != nil {
+			// 根据学院名称查找学院ID
+			var collegeId int64 = 0
+			if userProfile.College != "" {
+				college := this.collegeDao.FindByName(userProfile.College)
+				if college != nil {
+					collegeId = college.Id
+				}
+			}
+			
+			// 查找或创建提交记录
+			submission := this.submissionDao.FindByMatterUuid(matter.Uuid)
+			if submission == nil {
+				submission = &Submission{
+					MatterUuid: matter.Uuid,
+					TrackId:     trackId,
+					CollegeId:   collegeId,
+					Title:       workName,
+					AuthorName:  userProfile.RealName,
+					AuthorId:    userProfile.StudentId,
+					IsRecommended: false,
+					CreateTime:  matter.CreateTime,
+					UpdateTime:  matter.UpdateTime,
+				}
+			} else {
+				// 更新现有提交
+				submission.TrackId = trackId
+				submission.Title = workName
+				submission.UpdateTime = matter.UpdateTime
+			}
+			this.submissionDao.Save(submission)
+		}
+	}
+	
 	return this.Success(matter)
 }
 

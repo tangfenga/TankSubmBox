@@ -60,12 +60,19 @@ import { SpaceMemberRole } from '../../common/model/space/member/SpaceMemberRole
 import { debounce } from '../../common/util/OptimizeUtil';
 import HttpUtil from '../../common/util/HttpUtil';
 import { Label } from '../../common/model/user/UserRole';
+import Track from '../../common/model/track/Track';
+import { UserRole } from '../../common/model/user/UserRole';
 
 interface IProps {
   spaceUuid?: string;
 }
 
-interface IState {}
+interface IState {
+  trackId?: number;
+  workName?: string;
+  hasSubmission: boolean;
+  tracks: Track[];
+}
 
 export default class List extends TankComponent<IProps, IState> {
   isInSpace = !!this.props.spaceUuid; // 是否在空间中
@@ -137,6 +144,11 @@ export default class List extends TankComponent<IProps, IState> {
     super(props);
 
     List.instance = this;
+    
+    this.state = {
+      hasSubmission: false,
+      tracks: [],
+    };
   }
 
   //拖拽上传
@@ -225,6 +237,12 @@ export default class List extends TankComponent<IProps, IState> {
         });
       }
     );
+
+    // 如果是普通用户，加载赛道信息和检查是否已有提交
+    if (this.isRegularUser()) {
+      this.loadTracks();
+      this.checkSubmission();
+    }
   }
 
   componentWillUnmount() {
@@ -595,6 +613,50 @@ export default class List extends TankComponent<IProps, IState> {
     return '/matter/list';
   }
 
+  // 检查是否是普通用户
+  isRegularUser(): boolean {
+    return this.user.role === UserRole.USER;
+  }
+
+  // 加载赛道列表
+  loadTracks() {
+    const track = new Track();
+    track.httpList((response: any) => {
+      this.setState({ tracks: response.data.data });
+    });
+  }
+
+  // 检查用户是否已有提交
+  checkSubmission() {
+    HttpUtil.httpGet(
+      '/api/submission/my',
+      {},
+      (response: any) => {
+        this.setState({ hasSubmission: response.data.data !== null });
+      }
+    );
+  }
+
+  // 处理文件夹上传（提交作品）
+  handleSubmissionUpload = (file: File, puuid: string, errHandle?: (msg?: string) => void) => {
+    if (this.state.hasSubmission) {
+      MessageBoxUtil.error('您已经提交过作品，不能重复提交');
+      return;
+    }
+
+    if (!this.state.trackId) {
+      MessageBoxUtil.error('请选择赛道');
+      return;
+    }
+
+    if (!this.state.workName) {
+      MessageBoxUtil.error('请输入作品名称');
+      return;
+    }
+
+    this.launchUpload(file, puuid, errHandle);
+  }
+
   //刷新面包屑
   refreshBreadcrumbs() {
     this.currentDirectory.uuid =
@@ -694,6 +756,14 @@ export default class List extends TankComponent<IProps, IState> {
     }
   };
 
+  handleTrackChange = (trackId: number) => {
+    this.setState({ trackId });
+  };
+
+  handleWorkNameChange = (workName: string) => {
+    this.setState({ workName });
+  };
+
   refreshSearch = debounce((value: string) => {
     this.searchState.loading = true;
     this.updateUI();
@@ -726,6 +796,11 @@ export default class List extends TankComponent<IProps, IState> {
 
   render() {
     const { pager, director, selectedMatters, dragEnterCount } = this;
+    const { hasSubmission, tracks, trackId, workName } = this.state;
+    
+    // 如果是普通用户，显示作品提交界面
+    const isSubmissionPage = this.isRegularUser() && !this.props.spaceUuid;
+    
     return (
       <div className="matter-list" ref={this.wrapperRef}>
         {dragEnterCount > 0 ? (
@@ -735,130 +810,200 @@ export default class List extends TankComponent<IProps, IState> {
         ) : null}
         <BreadcrumbPanel breadcrumbModels={this.getBreadcrumbModels()} />
 
-        <Row>
-          <Col xs={24} sm={24} md={14} lg={16} className="mt10">
-            <AntdSpace className="buttons">
-              {selectedMatters.length !== this.getListData().length ? (
-                <Button
-                  type="primary"
-                  className="mb10"
-                  onClick={() => this.checkAll()}
-                >
-                  <PlusSquareOutlined />
-                  {Lang.t('selectAll')}
-                </Button>
-              ) : null}
-              {this.getListData().length &&
-              selectedMatters.length === this.getListData().length ? (
-                <Button
-                  type="primary"
-                  className="mb10"
-                  onClick={() => this.checkNone()}
-                >
-                  <MinusSquareOutlined />
-                  {Lang.t('cancel')}
-                </Button>
-              ) : null}
-              {selectedMatters.length ? (
-                <>
-                  {!this.isSearch() && (
+        {isSubmissionPage ? (
+          // 作品提交界面
+          <div className="submission-panel">
+            <h2>作品提交</h2>
+            
+            {hasSubmission ? (
+              <div className="submission-warning">
+                <ExclamationCircleFilled style={{ color: '#faad14', marginRight: 8 }} />
+                您已经提交过作品，不能重复提交
+              </div>
+            ) : (
+              <>
+                <Row gutter={16} className="mb20">
+                  <Col xs={24} sm={12}>
+                    <div className="form-item">
+                      <label>选择赛道：</label>
+                      <select 
+                        className="ant-input" 
+                        value={trackId || ''}
+                        onChange={(e) => this.handleTrackChange(Number(e.target.value))}
+                        disabled={hasSubmission}
+                      >
+                        <option value="">请选择赛道</option>
+                        {tracks.map(track => (
+                          <option key={track.id} value={track.id}>
+                            {track.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <div className="form-item">
+                      <label>作品名称：</label>
+                      <Input
+                        value={workName || ''}
+                        onChange={(e) => this.handleWorkNameChange(e.target.value)}
+                        placeholder="请输入作品名称"
+                        disabled={hasSubmission}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+                
+                <div className="upload-section">
+                  <h3>上传作品文件夹</h3>
+                  <p className="upload-hint">请将您的作品文件整理到一个文件夹中，然后上传整个文件夹</p>
+                  
+                  <Upload
+                    className="ant-upload "
+                    customRequest={this.triggerUploadDir}
+                    showUploadList={false}
+                    directory
+                  >
+                    <Button 
+                      type="primary" 
+                      size="large"
+                      icon={<CloudUploadOutlined />}
+                      disabled={hasSubmission || !trackId || !workName}
+                    >
+                      {hasSubmission ? '已提交作品' : '选择文件夹并上传'}
+                    </Button>
+                  </Upload>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          // 原来的文件管理界面
+          <Row>
+            <Col xs={24} sm={24} md={14} lg={16} className="mt10">
+              <AntdSpace className="buttons">
+                {selectedMatters.length !== this.getListData().length ? (
+                  <Button
+                    type="primary"
+                    className="mb10"
+                    onClick={() => this.checkAll()}
+                  >
+                    <PlusSquareOutlined />
+                    {Lang.t('selectAll')}
+                  </Button>
+                ) : null}
+                {this.getListData().length &&
+                selectedMatters.length === this.getListData().length ? (
+                  <Button
+                    type="primary"
+                    className="mb10"
+                    onClick={() => this.checkNone()}
+                  >
+                    <MinusSquareOutlined />
+                    {Lang.t('cancel')}
+                  </Button>
+                ) : null}
+                {selectedMatters.length ? (
+                  <>
+                    {!this.isSearch() && (
+                      <Button
+                        type="primary"
+                        className="mb10"
+                        onClick={() => this.downloadZip()}
+                      >
+                        <DownloadOutlined />
+                        {Lang.t('download')}
+                      </Button>
+                    )}
+                    {this.checkHandlePermission() && (
+                      <>
+                        <Button
+                          type="primary"
+                          className="mb10"
+                          onClick={() => this.deleteBatch()}
+                        >
+                          <DeleteOutlined />
+                          {Lang.t('delete')}
+                        </Button>
+                        <Button
+                          type="primary"
+                          className="mb10"
+                          onClick={() => this.toggleMoveBatch()}
+                        >
+                          <DragOutlined />
+                          {Lang.t('matter.move')}
+                        </Button>
+                      </>
+                    )}
+                  </>
+                ) : null}
+
+                {this.checkHandlePermission() && !this.isSearch() && (
+                  <>
+                    <Upload
+                      className="ant-upload"
+                      customRequest={(e) => this.triggerUpload(e)}
+                      showUploadList={false}
+                      multiple
+                    >
+                      <Button type="primary" className="mb10">
+                        <CloudUploadOutlined />
+                        {Lang.t('matter.upload')}
+                      </Button>
+                    </Upload>
                     <Button
                       type="primary"
                       className="mb10"
-                      onClick={() => this.downloadZip()}
+                      onClick={() => this.uploadDirectoryBtnRef.current?.click()}
                     >
-                      <DownloadOutlined />
-                      {Lang.t('download')}
-                    </Button>
-                  )}
-                  {this.checkHandlePermission() && (
-                    <>
-                      <Button
-                        type="primary"
-                        className="mb10"
-                        onClick={() => this.deleteBatch()}
-                      >
-                        <DeleteOutlined />
-                        {Lang.t('delete')}
-                      </Button>
-                      <Button
-                        type="primary"
-                        className="mb10"
-                        onClick={() => this.toggleMoveBatch()}
-                      >
-                        <DragOutlined />
-                        {Lang.t('matter.move')}
-                      </Button>
-                    </>
-                  )}
-                </>
-              ) : null}
-
-              {this.checkHandlePermission() && !this.isSearch() && (
-                <>
-                  <Upload
-                    className="ant-upload"
-                    customRequest={(e) => this.triggerUpload(e)}
-                    showUploadList={false}
-                    multiple
-                  >
-                    <Button type="primary" className="mb10">
                       <CloudUploadOutlined />
-                      {Lang.t('matter.upload')}
+                      {Lang.t('matter.uploadDir')}
                     </Button>
-                  </Upload>
-                  <Button
-                    type="primary"
-                    className="mb10"
-                    onClick={() => this.uploadDirectoryBtnRef.current?.click()}
-                  >
+                    <Button
+                      type="primary"
+                      className="mb10"
+                      onClick={() => this.createDirectory()}
+                    >
+                      <FolderOutlined />
+                      {Lang.t('matter.create')}
+                    </Button>
+                  </>
+                )}
+
+                <Button
+                  type="primary"
+                  className="mb10"
+                  onClick={() => this.refresh()}
+                >
+                  <SyncOutlined />
+                  {Lang.t('refresh')}
+                </Button>
+
+                <Upload
+                  className="ant-upload display-none"
+                  customRequest={this.triggerUploadDir}
+                  showUploadList={false}
+                  directory
+                >
+                  <Button type="primary" ref={this.uploadDirectoryBtnRef}>
                     <CloudUploadOutlined />
                     {Lang.t('matter.uploadDir')}
                   </Button>
-                  <Button
-                    type="primary"
-                    className="mb10"
-                    onClick={() => this.createDirectory()}
-                  >
-                    <FolderOutlined />
-                    {Lang.t('matter.create')}
-                  </Button>
-                </>
-              )}
-
-              <Button
-                type="primary"
+                </Upload>
+              </AntdSpace>
+            </Col>
+            <Col xs={24} sm={24} md={10} lg={8} className="mt10">
+              <Input
                 className="mb10"
-                onClick={() => this.refresh()}
-              >
-                <SyncOutlined />
-                {Lang.t('refresh')}
-              </Button>
-
-              <Upload
-                className="ant-upload display-none"
-                customRequest={this.triggerUploadDir}
-                showUploadList={false}
-                directory
-              >
-                <Button type="primary" ref={this.uploadDirectoryBtnRef}>
-                  <CloudUploadOutlined />
-                  {Lang.t('matter.uploadDir')}
-                </Button>
-              </Upload>
-            </AntdSpace>
-          </Col>
-          <Col xs={24} sm={24} md={10} lg={8} className="mt10">
-            <Input
-              className="mb10"
-              placeholder={Lang.t('matter.searchFile')}
-              prefix={<SearchOutlined />}
-              value={this.searchState.keyword}
-              onChange={(e) => this.handleChangeSearch(e.target.value)}
-              allowClear
-            />
-          </Col>
-        </Row>
+                placeholder={Lang.t('matter.searchFile')}
+                prefix={<SearchOutlined />}
+                value={this.searchState.keyword}
+                onChange={(e) => this.handleChangeSearch(e.target.value)}
+                allowClear
+              />
+            </Col>
+          </Row>
+        )}
 
         {Children.toArray(
           this.uploadMattersMap[this.getSpaceUuid()]?.map((m) => (

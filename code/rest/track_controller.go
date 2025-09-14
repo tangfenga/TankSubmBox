@@ -26,7 +26,7 @@ func (this *TrackController) Init() {
 func (this *TrackController) RegisterRoutes() map[string]func(writer http.ResponseWriter, request *http.Request) {
 	routeMap := make(map[string]func(writer http.ResponseWriter, request *http.Request))
 
-	routeMap["/api/track/list"] = this.Wrap(this.List, USER_ROLE_ADMINISTRATOR)
+	routeMap["/api/track/list"] = this.Wrap(this.List, USER_ROLE_USER)
 	routeMap["/api/track/create"] = this.Wrap(this.Create, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/track/bulk-create"] = this.Wrap(this.BulkCreate, USER_ROLE_ADMINISTRATOR)
 	routeMap["/api/track/delete"] = this.Wrap(this.Delete, USER_ROLE_ADMINISTRATOR)
