@@ -158,7 +158,11 @@ func (this *MatterService) RequiredLabels(uuid string) []string {
 		this.logger.Info("User %s is college admin, returning college_admin label", uuid)
 		return []string{"college_admin"}
 	}
-	this.logger.Info("User %s is not college admin, role: %s", uuid, user.Role)
+	if user != nil && user.Role == USER_ROLE_JUDGE {
+		this.logger.Info("User %s is judge, returning judge label", uuid)
+		return []string{"judge"}
+	}
+	this.logger.Info("User %s is not college admin or judge, role: %s", uuid, user.Role)
 	return make([]string, 0)
 }
 

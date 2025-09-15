@@ -34,6 +34,15 @@ func (this *SubmissionDao) FindByMatterUuid(matterUuid string) *Submission {
 	return &submission
 }
 
+func (this *SubmissionDao) FindById(id int64) *Submission {
+	var submission Submission
+	db := core.CONTEXT.GetDB().Where("id = ?", id).First(&submission)
+	if db.Error != nil {
+		return nil
+	}
+	return &submission
+}
+
 func (this *SubmissionDao) FindByAuthorId(authorId string) []*Submission {
 	var submissions []*Submission
 	db := core.CONTEXT.GetDB().Where("author_id = ?", authorId).Find(&submissions)

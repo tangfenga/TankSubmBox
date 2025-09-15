@@ -516,6 +516,26 @@ func (this *MatterDao) PlainPage(
         if len(selectedUuid) == 0 {
             return 0, []*Matter{}
         }
+    } else if len(requiredLabels) > 0 && requiredLabels[0] == "judge" {
+        // 评委过滤逻辑：只能查看被推荐的作品
+        
+        this.logger.Info("Judge filtering: userUuid=%s", userUuid)
+        
+        // 查找所有被推荐的作品
+        err := core.CONTEXT.GetDB().Model(&Submission{}).
+            Where("is_recommended = ?", true).
+            Pluck("matter_uuid", &selectedUuid).
+            Error
+
+        if err != nil {
+            panic(err)
+        }
+
+        this.logger.Info("Judge filtering found %d recommended submissions", len(selectedUuid))
+
+        if len(selectedUuid) == 0 {
+            return 0, []*Matter{}
+        }
     } else {
         // 原有的标签过滤逻辑
         nameCount := len(requiredLabels)

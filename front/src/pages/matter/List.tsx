@@ -144,7 +144,7 @@ export default class List extends TankComponent<IProps, IState> {
     super(props);
 
     List.instance = this;
-    
+
     this.state = {
       hasSubmission: false,
       tracks: [],
@@ -243,6 +243,7 @@ export default class List extends TankComponent<IProps, IState> {
       this.loadTracks();
       this.checkSubmission();
     }
+
   }
 
   componentWillUnmount() {
@@ -277,6 +278,7 @@ export default class List extends TankComponent<IProps, IState> {
       // 刷新分页列表
       this.refreshPager();
     }
+    this.updateUI();
   }
 
   refreshPager() {
@@ -419,8 +421,10 @@ export default class List extends TankComponent<IProps, IState> {
         },
       });
     }
+
     this.tempUploadList = [];
     this.uploadErrorLogs = [];
+    this.setState({ hasSubmission: true });
     this.refresh();
   }, 0);
 
@@ -618,6 +622,11 @@ export default class List extends TankComponent<IProps, IState> {
     return this.user.role === UserRole.USER;
   }
 
+  // 检查是否是评委
+  isJudge(): boolean {
+    return this.user.role === UserRole.JUDGE;
+  }
+
   // 加载赛道列表
   loadTracks() {
     const track = new Track();
@@ -628,17 +637,19 @@ export default class List extends TankComponent<IProps, IState> {
 
   // 检查用户是否已有提交
   checkSubmission() {
-    HttpUtil.httpGet(
-      '/api/submission/my',
-      {},
-      (response: any) => {
-        this.setState({ hasSubmission: response.data.data !== null });
-      }
-    );
+    HttpUtil.httpGet('/api/submission/my', {}, (response: any) => {
+      this.setState({ hasSubmission: response.data.data !== null });
+    });
   }
 
+
+
   // 处理文件夹上传（提交作品）
-  handleSubmissionUpload = (file: File, puuid: string, errHandle?: (msg?: string) => void) => {
+  handleSubmissionUpload = (
+    file: File,
+    puuid: string,
+    errHandle?: (msg?: string) => void
+  ) => {
     if (this.state.hasSubmission) {
       MessageBoxUtil.error('您已经提交过作品，不能重复提交');
       return;
@@ -655,7 +666,7 @@ export default class List extends TankComponent<IProps, IState> {
     }
 
     this.launchUpload(file, puuid, errHandle);
-  }
+  };
 
   //刷新面包屑
   refreshBreadcrumbs() {
@@ -797,10 +808,10 @@ export default class List extends TankComponent<IProps, IState> {
   render() {
     const { pager, director, selectedMatters, dragEnterCount } = this;
     const { hasSubmission, tracks, trackId, workName } = this.state;
-    
+
     // 如果是普通用户，显示作品提交界面
     const isSubmissionPage = this.isRegularUser() && !this.props.spaceUuid;
-    
+
     return (
       <div className="matter-list" ref={this.wrapperRef}>
         {dragEnterCount > 0 ? (
@@ -814,10 +825,12 @@ export default class List extends TankComponent<IProps, IState> {
           // 作品提交界面
           <div className="submission-panel">
             <h2>作品提交</h2>
-            
+
             {hasSubmission ? (
               <div className="submission-warning">
-                <ExclamationCircleFilled style={{ color: '#faad14', marginRight: 8 }} />
+                <ExclamationCircleFilled
+                  style={{ color: '#faad14', marginRight: 8 }}
+                />
                 您已经提交过作品，不能重复提交
               </div>
             ) : (
@@ -826,14 +839,16 @@ export default class List extends TankComponent<IProps, IState> {
                   <Col xs={24} sm={12}>
                     <div className="form-item">
                       <label>选择赛道：</label>
-                      <select 
-                        className="ant-input" 
+                      <select
+                        className="ant-input"
                         value={trackId || ''}
-                        onChange={(e) => this.handleTrackChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          this.handleTrackChange(Number(e.target.value))
+                        }
                         disabled={hasSubmission}
                       >
                         <option value="">请选择赛道</option>
-                        {tracks.map(track => (
+                        {tracks.map((track) => (
                           <option key={track.id} value={track.id}>
                             {track.name}
                           </option>
@@ -846,27 +861,30 @@ export default class List extends TankComponent<IProps, IState> {
                       <label>作品名称：</label>
                       <Input
                         value={workName || ''}
-                        onChange={(e) => this.handleWorkNameChange(e.target.value)}
+                        onChange={(e) =>
+                          this.handleWorkNameChange(e.target.value)
+                        }
                         placeholder="请输入作品名称"
                         disabled={hasSubmission}
                       />
                     </div>
                   </Col>
                 </Row>
-                
+
                 <div className="upload-section">
                   <h3>上传作品文件夹</h3>
-                  <p className="upload-hint">请将您的作品文件整理到一个文件夹中，然后上传整个文件夹</p>
-                  
+                  <p className="upload-hint">
+                    请将您的作品文件整理到一个文件夹中，然后上传整个文件夹
+                  </p>
+
                   <Upload
                     className="ant-upload "
                     customRequest={this.triggerUploadDir}
                     showUploadList={false}
                     directory
                   >
-                    <Button 
-                      type="primary" 
-                      size="large"
+                    <Button
+                      type="primary"
                       icon={<CloudUploadOutlined />}
                       disabled={hasSubmission || !trackId || !workName}
                     >
@@ -954,7 +972,9 @@ export default class List extends TankComponent<IProps, IState> {
                     <Button
                       type="primary"
                       className="mb10"
-                      onClick={() => this.uploadDirectoryBtnRef.current?.click()}
+                      onClick={() =>
+                        this.uploadDirectoryBtnRef.current?.click()
+                      }
                     >
                       <CloudUploadOutlined />
                       {Lang.t('matter.uploadDir')}
@@ -1025,7 +1045,7 @@ export default class List extends TankComponent<IProps, IState> {
             ref={this.newMatterRef}
             matter={this.newMatter}
             allLabels={this.labelList}
-            userUuid={this.user.uuid ?? ""}
+            userUuid={this.user.uuid ?? ''}
             director={director}
             onCreateDirectoryCallback={() => this.refresh()}
           />
@@ -1045,7 +1065,7 @@ export default class List extends TankComponent<IProps, IState> {
                   }
                   key={matter.uuid}
                   director={director}
-                  userUuid={this.user.uuid ?? ""}
+                  userUuid={this.user.uuid ?? ''}
                   matter={matter}
                   allLabels={this.labelList}
                   onGoToDirectory={(id) => this.goToDirectory(id)}
