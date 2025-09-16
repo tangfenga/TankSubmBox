@@ -458,7 +458,10 @@ export default class List extends TankComponent<IProps, IState> {
                   file.webkitRelativePath,
                   msg,
                 ]);
-              }
+              },
+              undefined,
+              this.state.workName,
+              this.state.trackId
             );
           }
         }

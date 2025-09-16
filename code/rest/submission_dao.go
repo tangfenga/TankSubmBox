@@ -51,3 +51,12 @@ func (this *SubmissionDao) FindByAuthorId(authorId string) []*Submission {
 	}
 	return submissions
 }
+
+func (this *SubmissionDao) Delete(submission *Submission) {
+	if submission == nil {
+		return
+	}
+	
+	db := core.CONTEXT.GetDB().Delete(submission)
+	this.PanicError(db.Error)
+}

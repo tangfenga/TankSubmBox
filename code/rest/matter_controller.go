@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"github.com/eyebluecn/tank/code/core"
 	"github.com/eyebluecn/tank/code/tool/i18n"
 	"github.com/eyebluecn/tank/code/tool/result"
@@ -25,6 +26,7 @@ type MatterController struct {
 	userProfileDao    *UserProfileDao
 	submissionDao     *SubmissionDao
 	collegeDao        *CollegeDao
+	trackDao          *TrackDao
 }
 
 func (this *MatterController) Init() {
@@ -88,6 +90,11 @@ func (this *MatterController) Init() {
 	b = core.CONTEXT.GetBean(this.collegeDao)
 	if b, ok := b.(*CollegeDao); ok {
 		this.collegeDao = b
+	}
+
+	b = core.CONTEXT.GetBean(this.trackDao)
+	if b, ok := b.(*TrackDao); ok {
+		this.trackDao = b
 	}
 }
 
@@ -269,6 +276,25 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 
 	var dirMatter = this.matterDao.CheckWithRootByUuid(puuid, space)
 
+	// 如果提供了赛道和作品名，则重命名文件夹为 赛道-作品名-学号 格式
+	if trackIdStr != "" && workName != "" && user.Role == USER_ROLE_USER {
+		trackId := util.ExtractRequestInt64(request, "trackId")
+		
+		// 获取用户档案信息
+		userProfile := this.userProfileDao.FindByUserUuid(user.Uuid)
+		if userProfile != nil && userProfile.StudentId != "" {
+			// 获取赛道名称
+			track := this.trackDao.Find(trackId)
+			if track != nil {
+				// 构建新文件夹名: 赛道-作品名-学号
+				newName := fmt.Sprintf("%s-%s-%s", track.Name, workName, userProfile.StudentId)
+				name = newName
+			}
+		}
+	}
+
+	fmt.Println(">>>>>> %v %v %v ", name, trackIdStr, workName);
+
 	matter := this.matterService.AtomicCreateDirectory(request, dirMatter, name, user, space)
 	
 	// 如果是普通用户创建文件夹，并且提供了赛道和作品名，则更新提交信息
@@ -315,6 +341,8 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 func (this *MatterController) Upload(writer http.ResponseWriter, request *http.Request) *result.WebResult {
 	puuid := util.ExtractRequestString(request, "puuid")
 	privacy := util.ExtractRequestOptionalBool(request, "privacy", true)
+	trackIdStr := util.ExtractRequestOptionalString(request, "trackId", "")
+	workName := util.ExtractRequestOptionalString(request, "workName", "")
 
 	user := this.checkUser(request)
 	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
@@ -339,6 +367,28 @@ func (this *MatterController) Upload(writer http.ResponseWriter, request *http.R
 	pos = strings.LastIndex(fileName, "/")
 	if pos != -1 {
 		fileName = fileName[pos+1:]
+	}
+
+	// 如果提供了赛道和作品名，则重命名文件为 赛道-作品名-学号 格式
+	if trackIdStr != "" && workName != "" && user.Role == USER_ROLE_USER {
+		trackId := util.ExtractRequestInt64(request, "trackId")
+		
+		// 获取用户档案信息
+		userProfile := this.userProfileDao.FindByUserUuid(user.Uuid)
+		if userProfile != nil && userProfile.StudentId != "" {
+			// 获取赛道名称
+			track := this.trackDao.Find(trackId)
+			if track != nil {
+				// 构建新文件名: 赛道-作品名-学号.扩展名
+				extension := ""
+				if dotIndex := strings.LastIndex(fileName, "."); dotIndex != -1 {
+					extension = fileName[dotIndex:]
+					fileName = fileName[:dotIndex]
+				}
+				newFileName := fmt.Sprintf("%s-%s-%s%s", track.Name, workName, userProfile.StudentId, extension)
+				fileName = newFileName
+			}
+		}
 	}
 
 	dirMatter := this.matterDao.CheckWithRootByUuid(puuid, space)

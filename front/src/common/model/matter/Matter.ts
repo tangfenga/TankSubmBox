@@ -189,13 +189,17 @@ export default class Matter extends BaseEntity {
   httpCreateDirectory(
     successCallback?: any,
     errorCallback?: any,
-    finallyCallback?: any
+    finallyCallback?: any,
+    workName?: string,
+    trackId?: number,
   ) {
     let that = this;
     let form = {
       name: this.name,
       puuid: this.puuid,
       spaceUuid: this.spaceUuid,
+      workName: workName,
+      trackId: trackId
     };
 
     return this.httpPost(

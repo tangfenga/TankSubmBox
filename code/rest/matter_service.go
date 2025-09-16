@@ -411,6 +411,14 @@ func (this *MatterService) Delete(request *http.Request, matter *Matter, user *U
 		panic(result.BadRequest("matter cannot be nil"))
 	}
 
+	// 删除对应的提交记录（如果是文件夹）
+	if matter.Dir {
+		submission := this.submissionDao.FindByMatterUuid(matter.Uuid)
+		if submission != nil {
+			this.submissionDao.Delete(submission)
+		}
+	}
+
 	this.matterDao.Delete(matter)
 
 	//re compute the size of Route.
@@ -426,6 +434,14 @@ func (this *MatterService) SoftDelete(request *http.Request, matter *Matter, use
 
 	if matter.Deleted {
 		panic(result.BadRequest("matter has been deleted"))
+	}
+
+	// 软删除时也删除对应的提交记录（如果是文件夹）
+	if matter.Dir {
+		submission := this.submissionDao.FindByMatterUuid(matter.Uuid)
+		if submission != nil {
+			this.submissionDao.Delete(submission)
+		}
 	}
 
 	this.matterDao.SoftDelete(matter)

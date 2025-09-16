@@ -329,7 +329,7 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
     return (
       <div className="right-part">
         <span className="matter-operation text-theme">
-          {/* 只保留下载按钮 */}
+          {/* 保留下载按钮 */}
           <Tooltip title={Lang.t('matter.download')}>
             <DownloadOutlined
               className="btn-action"
@@ -338,6 +338,18 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
               }
             />
           </Tooltip>
+
+          {/* 恢复删除按钮 */}
+          {this.checkHandlePermission() && (
+            <Tooltip title={Lang.t('matter.delete')}>
+              <DeleteOutlined
+                className="btn-action text-danger"
+                onClick={(e) =>
+                  SafeUtil.stopPropagationWrap(e)(this.deleteMatter())
+                }
+              />
+            </Tooltip>
+          )}
 
           {/* 学院管理员可以看到推荐按钮 */}
           {this.isCollegeAdmin() && (
