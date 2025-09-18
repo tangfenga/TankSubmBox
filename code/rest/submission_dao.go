@@ -52,6 +52,24 @@ func (this *SubmissionDao) FindByAuthorId(authorId string) []*Submission {
 	return submissions
 }
 
+func (this *SubmissionDao) FindRecommendedByCollegeId(collegeId int64) []*Submission {
+	var submissions []*Submission
+	db := core.CONTEXT.GetDB().Where("college_id = ? AND is_recommended = ?", collegeId, true).Find(&submissions)
+	if db.Error != nil {
+		return nil
+	}
+	return submissions
+}
+
+func (this *SubmissionDao) FindAllRecommended() []*Submission {
+	var submissions []*Submission
+	db := core.CONTEXT.GetDB().Where("is_recommended = ?", true).Find(&submissions)
+	if db.Error != nil {
+		return nil
+	}
+	return submissions
+}
+
 func (this *SubmissionDao) Delete(submission *Submission) {
 	if submission == nil {
 		return

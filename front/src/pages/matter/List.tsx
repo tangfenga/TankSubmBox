@@ -72,6 +72,7 @@ interface IState {
   workName?: string;
   hasSubmission: boolean;
   tracks: Track[];
+  recommendedMatterUuids: string[]; // 已被推荐的matter UUID列表
 }
 
 export default class List extends TankComponent<IProps, IState> {
@@ -148,6 +149,7 @@ export default class List extends TankComponent<IProps, IState> {
     this.state = {
       hasSubmission: false,
       tracks: [],
+      recommendedMatterUuids: [],
     };
   }
 
@@ -244,6 +246,11 @@ export default class List extends TankComponent<IProps, IState> {
       this.checkSubmission();
     }
 
+    // 如果是学院管理员，获取推荐作品
+    if (this.isCollegeAdmin()) {
+      this.fetchRecommendedSubmissions();
+    }
+
   }
 
   componentWillUnmount() {
@@ -278,6 +285,12 @@ export default class List extends TankComponent<IProps, IState> {
       // 刷新分页列表
       this.refreshPager();
     }
+    
+    // 如果是学院管理员，刷新推荐作品列表
+    if (this.isCollegeAdmin()) {
+      this.fetchRecommendedSubmissions();
+    }
+    
     this.updateUI();
   }
 
@@ -628,6 +641,36 @@ export default class List extends TankComponent<IProps, IState> {
   // 检查是否是评委
   isJudge(): boolean {
     return this.user.role === UserRole.JUDGE;
+  }
+
+  // 检查是否是学院管理员
+  isCollegeAdmin(): boolean {
+    return this.user.role === UserRole.COLLEGE_ADMIN;
+  }
+
+  // 获取学院管理员所在学院的推荐作品
+  fetchRecommendedSubmissions() {
+    if (this.isCollegeAdmin()) {
+      HttpUtil.httpGet(
+        '/api/submission/recommended-by-college',
+        {},
+        (response: any) => {
+          console.log('推荐作品响应:', response);
+          response = response.data;
+          if (response && response.data && Array.isArray(response.data)) {
+            console.log('推荐作品UUID列表:', response.data);
+            this.setState({ recommendedMatterUuids: response.data });
+          } else {
+            console.log('没有推荐作品或响应格式错误');
+            this.setState({ recommendedMatterUuids: [] });
+          }
+        },
+        (msg: string) => {
+          console.error('获取推荐作品失败:', msg);
+          this.setState({ recommendedMatterUuids: [] });
+        }
+      );
+    }
   }
 
   // 加载赛道列表
@@ -1049,6 +1092,7 @@ export default class List extends TankComponent<IProps, IState> {
             matter={this.newMatter}
             allLabels={this.labelList}
             userUuid={this.user.uuid ?? ''}
+            isRecommended={false}
             director={director}
             onCreateDirectoryCallback={() => this.refresh()}
           />
@@ -1071,6 +1115,7 @@ export default class List extends TankComponent<IProps, IState> {
                   userUuid={this.user.uuid ?? ''}
                   matter={matter}
                   allLabels={this.labelList}
+                  isRecommended={ (() => { console.log(`${this.state.recommendedMatterUuids} ${matter.uuid}`); return this.state.recommendedMatterUuids && Array.isArray(this.state.recommendedMatterUuids) ? this.state.recommendedMatterUuids.includes(matter.uuid ?? '') : false})()}
                   onGoToDirectory={(id) => this.goToDirectory(id)}
                   onDeleteSuccess={() => this.pagerAndCapacityRefresh()}
                   onCheckMatter={(m) => this.checkMatter(m)}

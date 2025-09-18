@@ -39,6 +39,7 @@ interface IProps {
   director?: Director;
   allLabels: Label[];
   userUuid: string,
+  isRecommended?: boolean; // 是否已被推荐
   onCreateDirectoryCallback?: () => any;
   onDeleteSuccess?: () => any;
   onCheckMatter?: (matter?: Matter) => any;
@@ -497,8 +498,10 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
   }
 
   render() {
-    const { matter } = this.props;
+    const { matter, isRecommended } = this.props;
     const { ratingModalVisible, submissionId } = this.state;
+    
+    console.log('MatterPanel渲染:', matter.uuid, 'isRecommended:', isRecommended);
 
     const menu = (
       <Menu>
@@ -577,6 +580,11 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
                             title={Lang.t('matter.publicFileEveryoneCanVisit')}
                           >
                             <UnlockOutlined className="icon" />
+                          </Tooltip>
+                        )}
+                        {this.props.isRecommended && (
+                          <Tooltip title="已推荐">
+                            <span className="recommended-tag">已推荐</span>
                           </Tooltip>
                         )}
                       </span>
