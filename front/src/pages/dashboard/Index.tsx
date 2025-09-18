@@ -3,7 +3,7 @@ import { Link, RouteComponentProps } from 'react-router-dom';
 import './Index.less';
 import TankComponent from '../../common/component/TankComponent';
 import TankTitle from '../widget/TankTitle';
-import { Alert, Col, Row } from 'antd';
+import { Alert, Button, Col, Row, Table, Tag } from 'antd';
 import RatePanel from './widget/RatePanel';
 import ReactEcharts from 'echarts-for-react';
 import Echarts from 'echarts';
@@ -16,12 +16,29 @@ import FileUtil from '../../common/util/FileUtil';
 import Matter from '../../common/model/matter/Matter';
 import Lang from '../../common/model/global/Lang';
 import MessageBoxUtil from '../../common/util/MessageBoxUtil';
+import HttpUtil from '../../common/util/HttpUtil';
 
 Echarts.registerTheme('tank_theme', theme);
 
 interface IProps extends RouteComponentProps {}
 
 interface IState {}
+
+interface RatingStat {
+  submissionId: number;
+  matterName: string;
+  matterUuid: string;
+  authorName: string;
+  collegeName: string;
+  trackName: string;
+  phoneNumber: string;
+  studentId: string;
+  categoryScores: {
+    [key: string]: number;
+  };
+  totalScore: number;
+  judgeCount: number;
+}
 
 interface IpStruct {
   ip: string;
@@ -39,6 +56,9 @@ export default class Index extends TankComponent<IProps, IState> {
   matterPager: Pager<Matter> = new Pager<Matter>(this, Matter, 10);
 
   activeIpTop10: IpStruct[] = [];
+  
+  // 评分统计数据
+  ratingStats: RatingStat[] = [];
 
   //****************作图需要的对象******************/
   days: number = 15;
@@ -111,6 +131,7 @@ export default class Index extends TankComponent<IProps, IState> {
     this.refreshDashboardPager();
     this.refreshMatterPager();
     this.refreshActiveIpTop10();
+    this.refreshRatingStats();
   }
 
   updateDateStrings() {
@@ -248,6 +269,25 @@ export default class Index extends TankComponent<IProps, IState> {
     });
   }
 
+  // 获取评分统计数据
+  refreshRatingStats() {
+    let that = this;
+    HttpUtil.httpGet(
+      '/api/rating/stats',
+      {},
+      (response: any) => {
+        response = response.data;
+        if (response && response.data) {
+          that.ratingStats = response.data;
+          that.updateUI();
+        }
+      },
+      (msg: string) => {
+        console.error('获取评分统计数据失败:', msg);
+      }
+    );
+  }
+
   reRun() {
     let that = this;
     that.dashboard.httpEtl(function (data: any) {
@@ -255,6 +295,161 @@ export default class Index extends TankComponent<IProps, IState> {
 
       that.refresh();
     });
+  }
+
+  // 导出评分统计数据为CSV
+  exportRatingStatsToCSV() {
+    if (this.ratingStats.length === 0) {
+      MessageBoxUtil.info('没有数据可导出');
+      return;
+    }
+
+    // CSV头部
+    const headers = [
+      '作品名称',
+      '作者姓名', 
+      '学院',
+      '赛道',
+      '手机号',
+      '学号'
+    ];
+
+    // 添加动态评分类别头部
+    if (this.ratingStats.length > 0) {
+      const categories = Object.keys(this.ratingStats[0].categoryScores);
+      headers.push(...categories);
+    }
+
+    headers.push('总分', '评委数量');
+
+    // CSV数据行
+    const csvRows = [headers.join(',')];
+
+    this.ratingStats.forEach((stat) => {
+      const row = [
+        `"${stat.matterName}"`,
+        `"${stat.authorName || ''}"`,
+        `"${stat.collegeName || ''}"`,
+        `"${stat.trackName || ''}"`,
+        `"${stat.phoneNumber || ''}"`,
+        `"${stat.studentId || ''}"`
+      ];
+
+      // 添加动态评分数据
+      if (this.ratingStats.length > 0) {
+        const categories = Object.keys(this.ratingStats[0].categoryScores);
+        categories.forEach(category => {
+          const score = stat.categoryScores[category] || 0;
+          row.push(score.toFixed(2));
+        });
+      }
+
+      row.push(
+        stat.totalScore.toFixed(2),
+        Math.floor(stat.judgeCount / Object.keys(stat.categoryScores).length).toString()
+      );
+
+      csvRows.push(row.join(','));
+    });
+
+    // 创建下载链接
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `作品评分统计_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // 动态生成评分统计表格列定义
+  getRatingStatsColumns() {
+    const baseColumns = [
+      {
+        title: '作品名称',
+        dataIndex: 'matterName',
+        key: 'matterName',
+        render: (text: string, record: RatingStat) => (
+          <Link to={`/matter/detail/${record.matterUuid}`}>
+            {text}
+          </Link>
+        ),
+      },
+      {
+        title: '作者姓名',
+        dataIndex: 'authorName',
+        key: 'authorName',
+        render: (text: string) => text || '-',
+      },
+      {
+        title: '学院',
+        dataIndex: 'collegeName',
+        key: 'collegeName',
+        render: (text: string) => text || '-',
+      },
+      {
+        title: '赛道',
+        dataIndex: 'trackName',
+        key: 'trackName',
+        render: (text: string) => text || '-',
+      },
+      {
+        title: '手机号',
+        dataIndex: 'phoneNumber',
+        key: 'phoneNumber',
+        render: (text: string) => text || '-',
+      },
+      {
+        title: '学号',
+        dataIndex: 'studentId',
+        key: 'studentId',
+        render: (text: string) => text || '-',
+      },
+    ];
+
+    // 如果有数据，动态添加分类评分列
+    if (this.ratingStats.length > 0) {
+      const firstRecord = this.ratingStats[0];
+      const categoryColumns = Object.keys(firstRecord.categoryScores).map((category) => ({
+        title: category,
+        dataIndex: category,
+        key: category,
+        render: (text: string, record: RatingStat) => (
+          <Tag color={record.categoryScores[category] >= 80 ? 'green' : record.categoryScores[category] >= 60 ? 'orange' : 'red'}>
+            {record.categoryScores[category] ? record.categoryScores[category].toFixed(2) : '0.00'}
+          </Tag>
+        ),
+      }));
+
+      baseColumns.push(...categoryColumns);
+    }
+
+    baseColumns.push(
+      {
+        title: '总分',
+        dataIndex: 'totalScore',
+        key: 'totalScore',
+        render: (text: string, record: RatingStat) => (
+          <Tag color="blue">
+            {record.totalScore ? record.totalScore.toFixed(2) : '0.00'}
+          </Tag>
+        ),
+      } as any,
+      {
+        title: '评委数量',
+        key: 'judgeCount',
+        render: (record: RatingStat) => (
+          <Tag>{Math.floor(record.judgeCount / Object.keys(record.categoryScores).length)}</Tag>
+        ),
+      } as any
+    );
+
+    return baseColumns;
   }
 
   onChartReady() {}
@@ -448,6 +643,35 @@ export default class Index extends TankComponent<IProps, IState> {
                   })}
                 </ul>
               </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            <div className="figure-block">
+              <div className="title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>作品评分统计</span>
+                <Button 
+                  type="primary" 
+                  onClick={this.exportRatingStatsToCSV.bind(this)}
+                  disabled={this.ratingStats.length === 0}
+                >
+                  导出CSV
+                </Button>
+              </div>
+              <Table
+                columns={this.getRatingStatsColumns()}
+                dataSource={this.ratingStats}
+                rowKey="submissionId"
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) =>
+                    `第 ${range[0]}-${range[1]} 条，共 ${total} 条`,
+                }}
+              />
             </div>
           </Col>
         </Row>

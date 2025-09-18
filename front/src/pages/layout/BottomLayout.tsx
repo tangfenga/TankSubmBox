@@ -5,6 +5,7 @@ import Moon from '../../common/model/global/Moon';
 import DefaultLogoPng from '../../assets/image/logo.png';
 import Sun from '../../common/model/global/Sun';
 import Lang from '../../common/model/global/Lang';
+import AboutModal from './widget/AboutModal';
 
 interface IProps {}
 
@@ -46,7 +47,7 @@ export default class BottomLayout extends TankComponent<IProps, IState> {
         {/*It is not easy to open source，please do not remove the following code, thank you! ^_^ */}
         <span className="brand">
           {/* Powered by{' '} */}
-          <a target="_blank" href="https://github.com/eyebluecn/tank">
+          <a href="#" onClick={(e) => { e.preventDefault(); AboutModal.open(); }}>
             {/* <img alt="logo" className="w30" src={DefaultLogoPng} />{' '} */}
             {"关于"}
           </a>

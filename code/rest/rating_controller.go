@@ -31,6 +31,7 @@ func (this *RatingController) RegisterRoutes() map[string]func(writer http.Respo
 	routeMap := make(map[string]func(writer http.ResponseWriter, request *http.Request))
 	routeMap["/api/rating/submit"] = this.Wrap(this.SubmitRating, USER_ROLE_JUDGE)
 	routeMap["/api/rating/scored"] = this.Wrap(this.GetScoredSubmissions, USER_ROLE_JUDGE)
+	routeMap["/api/rating/stats"] = this.Wrap(this.GetRatingStats, USER_ROLE_ADMINISTRATOR)
 	return routeMap
 }
 
@@ -92,5 +93,11 @@ func (this *RatingController) GetScoredSubmissions(writer http.ResponseWriter, r
 	scoredSubmissionIds := this.ratingDao.FindScoredSubmissionIdsByJudge(user.Uuid)
 	
 	return this.Success(scoredSubmissionIds)
+}
+
+// 获取评分统计信息
+func (this *RatingController) GetRatingStats(writer http.ResponseWriter, request *http.Request) *result.WebResult {
+	stats := this.ratingDao.FindRatingStats()
+	return this.Success(stats)
 }
 
