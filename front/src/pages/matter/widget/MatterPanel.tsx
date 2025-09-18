@@ -110,6 +110,7 @@ export default class MatterPanel extends TankComponent<IProps, IState> {
       '/api/submission/by-matter',
       data,
       (response: any) => {
+        response = response.data;
         if (response && response.data && response.data.id) {
           this.setState({
             ratingModalVisible: true,

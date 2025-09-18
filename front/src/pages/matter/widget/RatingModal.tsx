@@ -13,10 +13,16 @@ interface IProps {
   onSuccess: () => void;
 }
 
+interface RatingItem {
+  name: string;
+  min: number;
+  max: number;
+  score: number | null;
+}
+
 interface IState {
   loading: boolean;
-  score: number | null;
-  comment: string;
+  ratingItems: RatingItem[];
 }
 
 export default class RatingModal extends TankComponent<IProps, IState> {
@@ -24,8 +30,11 @@ export default class RatingModal extends TankComponent<IProps, IState> {
     super(props);
     this.state = {
       loading: false,
-      score: null,
-      comment: ''
+      ratingItems: [
+        { name: '创新点', min: 0, max: 20, score: null },
+        { name: '完成度', min: 0, max: 20, score: null },
+        { name: '美观设计', min: 0, max: 20, score: null },
+      ]
     };
   }
 
@@ -33,58 +42,71 @@ export default class RatingModal extends TankComponent<IProps, IState> {
     if (prevProps.visible !== this.props.visible && this.props.visible) {
       // 重置表单状态
       this.setState({
-        score: null,
-        comment: ''
+        ratingItems: this.state.ratingItems.map(item => ({ ...item, score: null }))
       });
     }
   }
 
   // 提交评分
   submitRating = () => {
-    const { score, comment } = this.state;
+    const { ratingItems } = this.state;
     const { submissionId } = this.props;
 
-    if (score === null || score < 0 || score > 100) {
-      MessageBoxUtil.error('请输入0-100之间的评分');
+    // 验证所有评分项
+    const invalidItems = ratingItems.filter(item => 
+      item.score === null || item.score < item.min || item.score > item.max
+    );
+    
+    if (invalidItems.length > 0) {
+      MessageBoxUtil.error('请填写所有评分项，并确保分数在有效范围内');
       return;
     }
 
     this.setState({ loading: true });
 
-    const data = new FormData();
-    data.set('submissionId', submissionId.toString());
-    data.set('score', score.toString());
-    data.set('comment', comment);
-
-    HttpUtil.httpPost(
-      '/api/rating/submit',
-      data,
-      (response: any) => {
-        this.setState({ loading: false });
-        MessageBoxUtil.success('评分成功');
-        this.props.onSuccess();
-        this.props.onCancel();
-      },
-      (msg: string) => {
-        this.setState({ loading: false });
-        MessageBoxUtil.error(msg || '评分失败');
-      }
-    );
+    // 为每个评分项提交评分
+    let completedCount = 0;
+    let hasError = false;
+    
+    ratingItems.forEach((item, index) => {
+      const data = new FormData();
+      data.set('submissionId', submissionId.toString());
+      data.set('score', item.score!.toString());
+      data.set('comment', item.name);
+      
+      HttpUtil.httpPost(
+        '/api/rating/submit',
+        data,
+        () => {
+          completedCount++;
+          if (completedCount === ratingItems.length && !hasError) {
+            this.setState({ loading: false });
+            MessageBoxUtil.success('评分成功');
+            this.props.onSuccess();
+            this.props.onCancel();
+          }
+        },
+        (msg: string) => {
+          hasError = true;
+          this.setState({ loading: false });
+          MessageBoxUtil.error(msg || `第${index + 1}项评分失败`);
+        }
+      );
+    });
   };
 
   // 处理评分变化
-  handleScoreChange = (value: number | null) => {
-    this.setState({ score: value });
-  };
-
-  // 处理评语变化
-  handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.setState({ comment: e.target.value });
+  handleScoreChange = (index: number, value: number | null) => {
+    this.setState(prevState => ({
+      ratingItems: prevState.ratingItems.map((item, i) => 
+        i === index ? { ...item, score: value } : item
+      )
+    }));
   };
 
   render() {
     const { matter, visible, onCancel } = this.props;
-    const { loading, score, comment } = this.state;
+    const { loading, ratingItems } = this.state;
 
     return (
       <Modal
@@ -100,31 +122,31 @@ export default class RatingModal extends TankComponent<IProps, IState> {
             type="primary"
             loading={loading}
             onClick={this.submitRating}
-            disabled={score === null || score < 0 || score > 100}
+            disabled={ratingItems.some(item => item.score === null || item.score < item.min || item.score > item.max)}
           >
             提交评分
           </Button>
         ]}
       >
         <Form layout="vertical">
-          <Form.Item label="评分（0-100分）" required>
-            <InputNumber
-              min={0}
-              max={100}
-              value={score === null ? undefined : score}
-              onChange={this.handleScoreChange}
-              style={{ width: '100%' }}
-              placeholder="请输入0-100之间的分数"
-            />
-          </Form.Item>
-          <Form.Item label="评语（可选）">
-            <Input.TextArea
-              value={comment}
-              onChange={this.handleCommentChange}
-              placeholder="请输入评语"
-              rows={4}
-            />
-          </Form.Item>
+          {ratingItems.map((item, index) => (
+            <Form.Item 
+              key={index} 
+              label={`${item.name}（${item.min}-${item.max}分）`} 
+              required
+              validateStatus={item.score !== null && (item.score < item.min || item.score > item.max) ? 'error' : ''}
+              help={item.score !== null && (item.score < item.min || item.score > item.max) ? `请输入${item.min}-${item.max}之间的分数` : ''}
+            >
+              <InputNumber
+                min={item.min}
+                max={item.max}
+                value={item.score === null ? undefined : item.score}
+                onChange={(value) => this.handleScoreChange(index, value)}
+                style={{ width: '100%' }}
+                placeholder={`请输入${item.min}-${item.max}之间的分数`}
+              />
+            </Form.Item>
+          ))}
         </Form>
       </Modal>
     );
