@@ -18,6 +18,7 @@ import {
   Modal,
   Pagination,
   Row,
+  Select,
   Space as AntdSpace,
   Upload,
   List as AntdList,
@@ -62,6 +63,7 @@ import HttpUtil from '../../common/util/HttpUtil';
 import { Label } from '../../common/model/user/UserRole';
 import Track from '../../common/model/track/Track';
 import { UserRole } from '../../common/model/user/UserRole';
+import College from '../../common/model/college/College';
 
 interface IProps {
   spaceUuid?: string;
@@ -72,6 +74,7 @@ interface IState {
   workName?: string;
   hasSubmission: boolean;
   tracks: Track[];
+  colleges: College[];
   recommendedMatterUuids: string[]; // 已被推荐的matter UUID列表
 }
 
@@ -94,6 +97,7 @@ export default class List extends TankComponent<IProps, IState> {
   preference = Moon.getSingleton().preference;
   //导演
   director = new Director();
+  collegeModel = new College(this);
   //当前面包屑模型数组。
   breadcrumbModels: BreadcrumbModel[] = [];
   //分享
@@ -149,6 +153,7 @@ export default class List extends TankComponent<IProps, IState> {
     this.state = {
       hasSubmission: false,
       tracks: [],
+      colleges: [],
       recommendedMatterUuids: [],
     };
   }
@@ -245,6 +250,10 @@ export default class List extends TankComponent<IProps, IState> {
       this.loadTracks();
       this.checkSubmission();
     }
+
+    this.collegeModel.httpList(() => {
+      this.setState({ colleges: this.collegeModel.colleges });
+    });
 
     // 如果是学院管理员，获取推荐作品
     if (this.isCollegeAdmin()) {
@@ -854,7 +863,7 @@ export default class List extends TankComponent<IProps, IState> {
 
   render() {
     const { pager, director, selectedMatters, dragEnterCount } = this;
-    const { hasSubmission, tracks, trackId, workName } = this.state;
+    const { hasSubmission, tracks, trackId, workName, colleges } = this.state;
 
     // 如果是普通用户，显示作品提交界面
     const isSubmissionPage = this.isRegularUser() && !this.props.spaceUuid;
@@ -1060,14 +1069,27 @@ export default class List extends TankComponent<IProps, IState> {
               </AntdSpace>
             </Col>
             <Col xs={24} sm={24} md={10} lg={8} className="mt10">
-              <Input
+              <Select
                 className="mb10"
-                placeholder={Lang.t('matter.searchFile')}
-                prefix={<SearchOutlined />}
-                value={this.searchState.keyword}
-                onChange={(e) => this.handleChangeSearch(e.target.value)}
+                style={{ width: '100%' }}
+                placeholder="请选择学院"
                 allowClear
-              />
+                showSearch
+                optionFilterProp="children"
+                value={this.searchState.keyword || undefined}
+                onChange={(value) =>
+                  this.handleChangeSearch(value as string | undefined)
+                }
+                onClear={() => this.handleChangeSearch(undefined)}
+                suffixIcon={<SearchOutlined />}
+                loading={!colleges.length}
+              >
+                {colleges.map((college) => (
+                  <Select.Option key={college.id} value={college.name}>
+                    {college.name}
+                  </Select.Option>
+                ))}
+              </Select>
             </Col>
           </Row>
         )}
