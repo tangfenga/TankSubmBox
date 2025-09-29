@@ -89,6 +89,7 @@ let LangEn = {
     install: 'Install',
     dragMouseUp: 'Put file here~',
     space: 'Shared space',
+    batchSubmission: 'Batch Submission',
   },
   matter: {
     file: 'File',

@@ -34,15 +34,16 @@ const InputSize = ({
     );
   };
 
-  const change = (unit: Unit, num?: number) => {
-    if (!num) {
+  const change = (unit: Unit, num?: number | null) => {
+    if (num === undefined || num === null) {
       onChange?.(0);
+      return;
     }
-    onChange?.(num === -1 ? -1 : num! * FileUtil.unitToBytes(unit));
+    onChange?.(num === -1 ? -1 : num * FileUtil.unitToBytes(unit));
   };
 
-  const handleChangeNum = (value: number) => {
-    setNum(value);
+  const handleChangeNum = (value: number | null) => {
+    setNum(value === null ? undefined : value);
     change(unit, value);
   };
 

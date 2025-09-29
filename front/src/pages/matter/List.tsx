@@ -526,6 +526,7 @@ export default class List extends TankComponent<IProps, IState> {
         }
         m.file = file;
         m.httpUpload(
+          undefined,
           () => {
             const index = this.uploadMattersMap[this.getSpaceUuid()].findIndex(
               (matter) => matter === m

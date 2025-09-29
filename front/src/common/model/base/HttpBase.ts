@@ -225,6 +225,70 @@ export default class HttpBase extends ViewBase {
    */
   httpPost(
     url: any,
+    params: any = {},
+    successCallback?: any,
+    errorCallback?: any,
+    finallyCallback?: any,
+    opts?: any
+  ) {
+    let that = this;
+
+    if (!opts) {
+      opts = {};
+    }
+
+    that.loading = true;
+
+    //更新react控件的状态
+    that.updateUI();
+
+    let postData = params;
+    if (!(params instanceof FormData)) {
+      postData = qs.stringify(params);
+      if (!opts['headers']) {
+        opts['headers'] = {};
+      }
+      opts['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
+    }
+
+    return HttpUtil.httpPost(
+      url,
+      postData,
+      function (response: any) {
+        //有可能正常接口回来的数据也是错误的。交给错误处理器处理。
+        if (that.specialErrorHandler(response)) {
+          SafeUtil.safeCallback(errorCallback)(response);
+          return;
+        }
+
+        SafeUtil.safeCallback(successCallback)(response);
+      },
+      function (err: any) {
+        let response = err.response;
+
+        console.error('请求出错啦', response ? response : err);
+
+        //特殊错误情况的通用处理方式
+        if (that.specialErrorHandler(response)) {
+          return;
+        }
+
+        that.defaultErrorHandler(response, errorCallback);
+      },
+      function (res: any) {
+        that.loading = false;
+
+        //更新react控件的状态
+        that.updateUI();
+
+        SafeUtil.safeCallback(finallyCallback)(res);
+      },
+      opts
+    );
+  }
+
+  httpPostJson(
+    url: any,
     params = {},
     successCallback?: any,
     errorCallback?: any,
@@ -242,16 +306,14 @@ export default class HttpBase extends ViewBase {
     //更新react控件的状态
     that.updateUI();
 
-    let formData = qs.stringify(params);
-
     if (!opts['headers']) {
       opts['headers'] = {};
     }
-    opts['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
+    opts['headers']['Content-Type'] = 'application/json';
 
     return HttpUtil.httpPost(
       url,
-      formData,
+      params,
       function (response: any) {
         //有可能正常接口回来的数据也是错误的。交给错误处理器处理。
         if (that.specialErrorHandler(response)) {

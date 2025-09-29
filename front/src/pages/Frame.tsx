@@ -45,6 +45,7 @@ import ContentLayout from './layout/ContentLayout';
 import SpaceList from './space/List';
 import SpaceMemberList from './space/member/List';
 import SpaceMatterList from './space/matter/List';
+import SubmissionBatch from './submission/Batch';
 
 interface IProps extends RouteComponentProps<{}> {}
 
@@ -192,6 +193,11 @@ class RawFrame extends TankComponent<IProps, IState> {
                   path="/space/:spaceUuid/bin/list"
                   exact
                   component={BinList}
+                />
+                <Route
+                  path="/submission/batch"
+                  exact
+                  component={SubmissionBatch}
                 />
               </div>
             ) : (

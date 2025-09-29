@@ -31,9 +31,7 @@ export default class RatingModal extends TankComponent<IProps, IState> {
     this.state = {
       loading: false,
       ratingItems: [
-        { name: '创新点', min: 0, max: 20, score: null },
-        { name: '完成度', min: 0, max: 20, score: null },
-        { name: '美观设计', min: 0, max: 20, score: null },
+        { name: '分数', min: 0, max: 100, score: null },
       ]
     };
   }

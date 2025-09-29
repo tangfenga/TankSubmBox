@@ -230,6 +230,7 @@ func (this *TankContext) registerBeans() {
 	this.registerBean(new(rest.UserProfileDao))
 	this.registerBean(new(rest.UserService))
 	this.registerBean(new(rest.SubmissionDao))
+	this.registerBean(new(rest.SubmissionService))
 	this.registerBean(new(rest.SubmissionController))
 	this.registerBean(new(rest.RatingDao))
 	this.registerBean(new(rest.RatingController))

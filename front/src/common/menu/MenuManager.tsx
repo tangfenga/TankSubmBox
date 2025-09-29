@@ -111,6 +111,13 @@ export default class MenuManager {
             <TeamOutlined />
           )
         );
+        menuItems.push(
+          new MenuItem(
+            Lang.t('layout.batchSubmission'),
+            '/submission/batch',
+            <CloudSyncOutlined />
+          )
+        );
       }
       menuItems.push(
         new MenuItem(

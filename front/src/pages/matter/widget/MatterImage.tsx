@@ -63,6 +63,7 @@ export default class MatterImage extends TankComponent<IProps, IState> {
         spaceUuid: this.user.space.uuid,
       });
       this.matter.httpUpload(
+        undefined,
         () => {
           SafeUtil.safeCallback(this.props.onChange)(
             this.matter.getPreviewUrl()

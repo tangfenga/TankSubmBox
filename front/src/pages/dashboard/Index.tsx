@@ -6,7 +6,7 @@ import TankTitle from '../widget/TankTitle';
 import { Alert, Button, Col, Row, Table, Tag } from 'antd';
 import RatePanel from './widget/RatePanel';
 import ReactEcharts from 'echarts-for-react';
-import Echarts from 'echarts';
+import * as Echarts from 'echarts';
 import theme from './theme.json';
 import Pager from '../../common/model/base/Pager';
 import Dashboard from '../../common/model/dashboard/Dashboard';

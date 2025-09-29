@@ -83,6 +83,7 @@ let LangZh = {
     about: '关于',
     install: '安装网站',
     dragMouseUp: '可以松手啦~',
+    batchSubmission: '批量提交',
   },
   matter: {
     file: '文件',

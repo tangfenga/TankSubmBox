@@ -273,8 +273,17 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 	isRootDirectoryStr := util.ExtractRequestOptionalString(request, "isRootDirectory", "false")
 	isRootDirectory := isRootDirectoryStr == "true"
 	user := this.checkUser(request)
-	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
-	space := this.spaceService.CheckWritableByUuid(request, user, spaceUuid)
+	ownerUuid := util.ExtractRequestOptionalString(request, "ownerUuid", "")
+	targetUser := user
+	var space *Space
+
+	if ownerUuid != "" && user.Role == USER_ROLE_ADMINISTRATOR {
+		targetUser = this.userDao.CheckByUuid(ownerUuid)
+		space = this.spaceDao.CheckByUuid(targetUser.SpaceUuid)
+	} else {
+		spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
+		space = this.spaceService.CheckWritableByUuid(request, user, spaceUuid)
+	}
 
 	var dirMatter = this.matterDao.CheckWithRootByUuid(puuid, space)
 
@@ -295,7 +304,7 @@ func (this *MatterController) CreateDirectory(writer http.ResponseWriter, reques
 
 	fmt.Println(">>>>>> %v %v %v ", name, trackIdStr, workName);
 
-	matter := this.matterService.AtomicCreateDirectory(request, dirMatter, name, user, space)
+	matter := this.matterService.AtomicCreateDirectory(request, dirMatter, name, targetUser, space)
 	
 	// 如果是普通用户创建文件夹，并且提供了赛道和作品名，并且是根目录文件夹，则更新提交信息
 	if user.Role == USER_ROLE_USER && trackId > 0 && workName != "" && isRootDirectory {
@@ -343,10 +352,19 @@ func (this *MatterController) Upload(writer http.ResponseWriter, request *http.R
 	privacy := util.ExtractRequestOptionalBool(request, "privacy", true)
 	trackIdStr := util.ExtractRequestOptionalString(request, "trackId", "")
 	workName := util.ExtractRequestOptionalString(request, "workName", "")
+	ownerUuid := util.ExtractRequestOptionalString(request, "ownerUuid", "") // New field
 
 	user := this.checkUser(request)
-	spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
-	space := this.spaceService.CheckWritableByUuid(request, user, spaceUuid)
+	targetUser := user
+	var space *Space
+
+	if ownerUuid != "" && user.Role == USER_ROLE_ADMINISTRATOR {
+		targetUser = this.userDao.CheckByUuid(ownerUuid)
+		space = this.spaceDao.CheckByUuid(targetUser.SpaceUuid)
+	} else {
+		spaceUuid := util.ExtractRequestOptionalString(request, "spaceUuid", user.SpaceUuid)
+		space = this.spaceService.CheckWritableByUuid(request, user, spaceUuid)
+	}
 
 	file, handler, err := request.FormFile("file")
 	this.PanicError(err)
@@ -394,7 +412,7 @@ func (this *MatterController) Upload(writer http.ResponseWriter, request *http.R
 	dirMatter := this.matterDao.CheckWithRootByUuid(puuid, space)
 
 	//support upload simultaneously
-	matter := this.matterService.Upload(request, file, handler, user, space, dirMatter, fileName, privacy)
+	matter := this.matterService.Upload(request, file, handler, targetUser, space, dirMatter, fileName, privacy)
 
 	return this.Success(matter)
 }

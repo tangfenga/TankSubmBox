@@ -548,7 +548,7 @@ export default class Matter extends BaseEntity {
   }
 
   //文件上传
-  httpUpload(successCallback?: any, failureCallback?: any) {
+  httpUpload(ownerUuid?: string, successCallback?: any, failureCallback?: any) {
     let that = this;
 
     //验证是否装填好
@@ -575,6 +575,9 @@ export default class Matter extends BaseEntity {
     formData.append('file', that.file!);
     formData.append('alien', that.alien.toString());
     formData.append('privacy', that.privacy.toString());
+    if (ownerUuid) {
+      formData.append('ownerUuid', ownerUuid);
+    }
 
     //闭包
     let lastTimeStamp = new Date().getTime();
