@@ -213,7 +213,7 @@ func getSubmissions(db *sql.DB, config *Config) ([]SubmissionInfo, error) {
 		s.TrackName = sanitizeFileName(s.TrackName, config.MaxNameLength)
 		s.Title = sanitizeFileName(s.Title, config.MaxNameLength)
 
-		// 构建旧文件夹路径
+		// 构建旧文件夹路径（用于显示）
 		s.OldFolderPath = filepath.Join("matter", s.SpaceName, "root", s.MatterName)
 
 		// 构建新文件夹名：名字-赛道-作品名
@@ -261,8 +261,20 @@ func sanitizeFileName(name string, maxLength int) string {
 }
 
 func renameFolder(matterPath string, submission SubmissionInfo) error {
-	oldPath := filepath.Join(matterPath, submission.SpaceName, "root", submission.MatterName)
-	newPath := filepath.Join(matterPath, submission.SpaceName, "root", submission.NewFolderName)
+	// 构建绝对路径
+	absPath, err := filepath.Abs(matterPath)
+	if err != nil {
+		absPath = matterPath
+	}
+
+	oldPath := filepath.Join(absPath, submission.SpaceName, "root", submission.MatterName)
+	newPath := filepath.Join(absPath, submission.SpaceName, "root", submission.NewFolderName)
+
+	// 输出路径信息（可选，用于调试）
+	// fmt.Printf("  调试: matterPath=%s\n", matterPath)
+	// fmt.Printf("  调试: absPath=%s\n", absPath)
+	// fmt.Printf("  调试: oldPath=%s\n", oldPath)
+	// fmt.Printf("  调试: newPath=%s\n", newPath)
 
 	// 检查原文件夹是否存在
 	if _, err := os.Stat(oldPath); os.IsNotExist(err) {
@@ -275,7 +287,7 @@ func renameFolder(matterPath string, submission SubmissionInfo) error {
 	}
 
 	// 重命名文件夹
-	err := os.Rename(oldPath, newPath)
+	err = os.Rename(oldPath, newPath)
 	if err != nil {
 		return fmt.Errorf("重命名失败: %v", err)
 	}
